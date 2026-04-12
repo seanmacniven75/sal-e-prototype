@@ -6,58 +6,56 @@
     <title>SAL-E Research App</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background: #000; color: #fff; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; overflow: hidden; }
-        #phone-shell { width: 375px; height: 812px; border: 8px solid #27272a; border-radius: 40px; position: relative; overflow: hidden; margin: 20px auto; display: flex; flex-direction: column; background: #000; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
+        /* Updated to Light Mode */
+        body { background: #f4f4f7; color: #1c1c1e; font-family: -apple-system, system-ui, sans-serif; overflow: hidden; }
+        #phone-shell { width: 375px; height: 812px; border: 12px solid #000; border-radius: 50px; position: relative; overflow: hidden; margin: 20px auto; display: flex; flex-direction: column; background: #fff; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.2); }
         .screen { display: none; height: 100%; flex-direction: column; padding: 40px 24px; }
         .active { display: flex; }
-        .face-grid { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 12px; margin: auto 0; width: 100%; aspect-ratio: 1/1; }
-        .face-cell { background: #18181b; border-radius: 8px; overflow: hidden; position: relative; border: 1px solid #27272a; cursor: pointer; }
-        .face-cell img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
-        .fixation-cross { font-size: 80px; font-weight: 200; margin: auto; color: #fff; }
-        .btn-ios { background: #007AFF; padding: 18px; border-radius: 14px; font-weight: 600; text-align: center; margin-top: auto; cursor: pointer; border: none; color: white; font-size: 16px; transition: opacity 0.2s; }
-        .btn-ios:active { opacity: 0.7; }
+        .face-grid { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 8px; margin: auto 0; width: 100%; aspect-ratio: 1/1; }
+        .face-cell { background: #eee; border-radius: 12px; overflow: hidden; position: relative; border: 1px solid #ddd; cursor: pointer; }
+        .face-cell img { width: 100%; height: 100%; object-fit: cover; }
+        .fixation-cross { font-size: 60px; font-weight: 300; margin: auto; color: #000; }
+        .btn-ios { background: #007AFF; padding: 18px; border-radius: 14px; font-weight: 600; text-align: center; margin-top: auto; cursor: pointer; color: white; font-size: 16px; }
+        input[type=range] { width: 100%; accent-color: #007AFF; }
     </style>
 </head>
 <body>
 
 <div id="phone-shell">
-    <!-- 1. LOADING SCREEN -->
-    <div id="screen-loading" class="screen active justify-center items-center text-center">
-        <p class="text-zinc-500 animate-pulse text-sm">Synchronizing Stimuli...</p>
+    <div id="screen-loading" class="screen active justify-center items-center">
+        <p class="text-zinc-400 animate-pulse text-sm">Loading Manifest...</p>
     </div>
 
-    <!-- 2. SETUP SCREEN -->
-    <div id="screen-setup" class="screen flex-col pt-20">
-        <h1 class="text-3xl font-bold mb-2">SAL-E</h1>
-        <p class="text-zinc-500 text-xs mb-10 tracking-wide uppercase">Social Anxiety Study Prototype</p>
+    <div id="screen-setup" class="screen flex-col pt-16">
+        <h1 class="text-3xl font-bold mb-1">SAL-E</h1>
+        <p class="text-zinc-400 text-xs mb-10 uppercase tracking-widest">Research Prototype</p>
         
-        <label class="text-[10px] uppercase text-zinc-600 font-bold mb-2 tracking-widest">Stimulus Ethnicity</label>
-        <select id="group-select" class="bg-zinc-900 p-4 rounded-xl mb-6 outline-none text-white border border-zinc-800 appearance-none">
-            <option value="BM">Black Male (BM)</option>
-            <option value="BF">Black Female (BF)</option>
-            <option value="WM">White Male (WM)</option>
-            <option value="WF">White Female (WF)</option>
+        <label class="text-[10px] uppercase text-zinc-500 font-bold mb-2">Target Group</label>
+        <select id="race-select" class="bg-zinc-100 p-4 rounded-xl mb-6 outline-none border border-zinc-200">
+            <option value="white">White (WF & WM)</option>
+            <option value="black">Black (BF & BM)</option>
         </select>
 
-        <button onclick="startStudy()" class="btn-ios">Start Block (16 Trials)</button>
+        <label class="text-[10px] uppercase text-zinc-500 font-bold mb-2">Display Duration: <span id="dur-val">5</span>s</label>
+        <input type="range" id="duration-slider" min="3000" max="10000" step="500" value="5000" 
+               oninput="document.getElementById('dur-val').innerText = (this.value/1000).toFixed(1)">
+        <p class="text-[9px] text-zinc-400 mt-1 mb-8">Time images remain visible before auto-advance.</p>
+
+        <button onclick="startStudy()" class="btn-ios">Start Block</button>
     </div>
 
-    <!-- 3. FIXATION SCREEN (1.5s) -->
     <div id="screen-fixation" class="screen justify-center items-center">
         <div class="fixation-cross">+</div>
     </div>
 
-    <!-- 4. TRIAL SCREEN (3.0s) -->
     <div id="screen-trial" class="screen">
-        <div id="progress" class="text-center text-[10px] text-zinc-700 font-black mb-4">TRIAL 0 / 16</div>
+        <div id="progress" class="text-center text-[10px] text-zinc-400 font-bold mb-4">TRIAL</div>
         <div class="face-grid" id="face-grid"></div>
     </div>
 
-    <!-- 5. COMPLETION SCREEN -->
     <div id="screen-done" class="screen justify-center items-center text-center">
-        <h2 class="text-xl font-bold mb-2">Session Complete</h2>
-        <p class="text-zinc-500 text-sm mb-12">Trial-level metrics recorded.</p>
-        <button onclick="location.reload()" class="text-blue-500 font-semibold py-2 px-6 border border-blue-500/20 rounded-full">New Session</button>
+        <h2 class="text-xl font-bold mb-2">Complete</h2>
+        <button onclick="location.reload()" class="text-blue-500 mt-4">Restart</button>
     </div>
 </div>
 
@@ -68,16 +66,13 @@
     let trialStartTime;
     let autoTimer;
 
-    // Load manifest from root
     async function init() {
         try {
             const response = await fetch(`manifest.json?v=${Date.now()}`);
-            if (!response.ok) throw new Error();
             manifest = await response.json();
             showScreen('screen-setup');
         } catch (e) {
-            document.getElementById('screen-loading').innerHTML = 
-                `<p class="text-red-500 text-xs px-10">Error: manifest.json missing at root.</p>`;
+            document.getElementById('screen-loading').innerText = "Error loading manifest.json";
         }
     }
 
@@ -94,28 +89,24 @@
 
     function runTrialCycle() {
         if (currentTrial >= 16) {
-            console.table(results); // Log data to console for developer
+            console.table(results);
             showScreen('screen-done');
             return;
         }
-
         currentTrial++;
         document.getElementById('progress').innerText = `TRIAL ${currentTrial} / 16`;
-
-        // 1. Fixation
         showScreen('screen-fixation');
 
         setTimeout(() => {
-            // 2. Stimulus
             renderTrial();
             showScreen('screen-trial');
             trialStartTime = performance.now();
-
+            
+            const displayTime = parseInt(document.getElementById('duration-slider').value);
             autoTimer = setTimeout(() => {
                 logTrial('timeout');
                 runTrialCycle();
-            }, 3000);
-
+            }, displayTime);
         }, 1500);
     }
 
@@ -123,23 +114,25 @@
         const grid = document.getElementById('face-grid');
         grid.innerHTML = '';
         
-        const group = document.getElementById('group-select').value;
-        const ids = manifest[group];
-        // Pick a random identity from the manifest
-        const randomID = ids[Math.floor(Math.random() * ids.length)];
+        const selection = document.getElementById('race-select').value;
+        let pool = [];
         
-        // Randomize 2x2 grid positions
+        // Combine subfolders based on selection
+        if (selection === 'white') {
+            // map folders to include their parent prefix
+            pool = [...manifest.WF.map(id => `WF/${id}`), ...manifest.WM.map(id => `WM/${id}`)];
+        } else {
+            pool = [...manifest.BF.map(id => `BF/${id}`), ...manifest.BM.map(id => `BM/${id}`)];
+        }
+
+        // Pick one random subfolder path (e.g., "WF/WF06")
+        const randomPath = pool[Math.floor(Math.random() * pool.length)];
         const emotions = ['NC', 'AO', 'SC', 'FC'].sort(() => Math.random() - 0.5);
 
         emotions.forEach(emo => {
             const cell = document.createElement('div');
             cell.className = "face-cell aspect-square";
-            
-            // Path: group/identity/emotion.jpg
-            const imgPath = `${group}/${randomID}/${emo}.jpg`;
-            
-            cell.innerHTML = `<img src="${imgPath}" onerror="this.style.opacity='0.1';">`;
-
+            cell.innerHTML = `<img src="${randomPath}/${emo}.jpg" onerror="this.src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='">`;
             cell.onclick = () => {
                 clearTimeout(autoTimer);
                 logTrial(emo);
@@ -150,16 +143,14 @@
     }
 
     function logTrial(choice) {
-        const reactionTime = (performance.now() - trialStartTime).toFixed(0);
         results.push({
             trial: currentTrial,
             choice: choice,
-            tttf_ms: choice === 'timeout' ? 3000 : reactionTime
+            rt: (performance.now() - trialStartTime).toFixed(0)
         });
     }
 
     init();
 </script>
-
 </body>
 </html>
