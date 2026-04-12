@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SAL-E Research App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background: #000; color: #fff; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; overflow: hidden; }
+        #phone-shell { width: 375px; height: 812px; border: 8px solid #27272a; border-radius: 40px; position: relative; overflow: hidden; margin: 20px auto; display: flex; flex-direction: column; background: #000; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
+        .screen { display: none; height: 100%; flex-direction: column; padding: 40px 24px; }
+        .active { display: flex; }
+        .face-grid { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 12px; margin: auto 0; width: 100%; aspect-ratio: 1/1; }
+        .face-cell { background: #18181b; border-radius: 8px; overflow: hidden; position: relative; border: 1px solid #27272a; cursor: pointer; }
+        .face-cell img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
+        .fixation-cross { font-size: 80px; font-weight: 200; margin: auto; color: #fff; }
+        .btn-ios { background: #007AFF; padding: 18px; border-radius: 14px; font-weight: 600; text-align: center; margin-top: auto; cursor: pointer; border: none; color: white; font-size: 16px; transition: opacity 0.2s; }
+        .btn-ios:active { opacity: 0.7; }
+    </style>
+</head>
+<body>
+
+<div id="phone-shell">
+    <!-- 1. LOADING SCREEN -->
+    <div id="screen-loading" class="screen active justify-center items-center text-center">
+        <p class="text-zinc-500 animate-pulse text-sm">Synchronizing Stimuli...</p>
+    </div>
+
+    <!-- 2. SETUP SCREEN -->
+    <div id="screen-setup" class="screen flex-col pt-20">
+        <h1 class="text-3xl font-bold mb-2">SAL-E</h1>
+        <p class="text-zinc-500 text-xs mb-10 tracking-wide uppercase">Social Anxiety Study Prototype</p>
+        
+        <label class="text-[10px] uppercase text-zinc-600 font-bold mb-2 tracking-widest">Stimulus Ethnicity</label>
+        <select id="group-select" class="bg-zinc-900 p-4 rounded-xl mb-6 outline-none text-white border border-zinc-800 appearance-none">
+            <option value="BM">Black Male (BM)</option>
+            <option value="BF">Black Female (BF)</option>
+            <option value="WM">White Male (WM)</option>
+            <option value="WF">White Female (WF)</option>
+        </select>
+
+        <button onclick="startStudy()" class="btn-ios">Start Block (16 Trials)</button>
+    </div>
+
+    <!-- 3. FIXATION SCREEN (1.5s) -->
+    <div id="screen-fixation" class="screen justify-center items-center">
+        <div class="fixation-cross">+</div>
+    </div>
+
+    <!-- 4. TRIAL SCREEN (3.0s) -->
+    <div id="screen-trial" class="screen">
+        <div id="progress" class="text-center text-[10px] text-zinc-700 font-black mb-4">TRIAL 0 / 16</div>
+        <div class="face-grid" id="face-grid"></div>
+    </div>
+
+    <!-- 5. COMPLETION SCREEN -->
+    <div id="screen-done" class="screen justify-center items-center text-center">
+        <h2 class="text-xl font-bold mb-2">Session Complete</h2>
+        <p class="text-zinc-500 text-sm mb-12">Trial-level metrics recorded.</p>
+        <button onclick="location.reload()" class="text-blue-500 font-semibold py-2 px-6 border border-blue-500/20 rounded-full">New Session</button>
+    </div>
+</div>
+
+<script>
+    let manifest = null;
+    let currentTrial = 0;
+    let results = [];
+    let trialStartTime;
+    let autoTimer;
+
+    // Load manifest from root
+    async function init() {
+        try {
+            const response = await fetch(`manifest.json?v=${Date.now()}`);
+            if (!response.ok) throw new Error();
+            manifest = await response.json();
+            showScreen('screen-setup');
+        } catch (e) {
+            document.getElementById('screen-loading').innerHTML = 
+                `<p class="text-red-500 text-xs px-10">Error: manifest.json missing at root.</p>`;
+        }
+    }
+
+    function showScreen(id) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+    }
+
+    function startStudy() {
+        currentTrial = 0;
+        results = [];
+        runTrialCycle();
+    }
+
+    function runTrialCycle() {
+        if (currentTrial >= 16) {
+            console.table(results); // Log data to console for developer
+            showScreen('screen-done');
+            return;
+        }
+
+        currentTrial++;
+        document.getElementById('progress').innerText = `TRIAL ${currentTrial} / 16`;
+
+        // 1. Fixation
+        showScreen('screen-fixation');
+
+        setTimeout(() => {
+            // 2. Stimulus
+            renderTrial();
+            showScreen('screen-trial');
+            trialStartTime = performance.now();
+
+            autoTimer = setTimeout(() => {
+                logTrial('timeout');
+                runTrialCycle();
+            }, 3000);
+
+        }, 1500);
+    }
+
+    function renderTrial() {
+        const grid = document.getElementById('face-grid');
+        grid.innerHTML = '';
+        
+        const group = document.getElementById('group-select').value;
+        const ids = manifest[group];
+        // Pick a random identity from the manifest
+        const randomID = ids[Math.floor(Math.random() * ids.length)];
+        
+        // Randomize 2x2 grid positions
+        const emotions = ['NC', 'AO', 'SC', 'FC'].sort(() => Math.random() - 0.5);
+
+        emotions.forEach(emo => {
+            const cell = document.createElement('div');
+            cell.className = "face-cell aspect-square";
+            
+            // Path: group/identity/emotion.jpg
+            const imgPath = `${group}/${randomID}/${emo}.jpg`;
+            
+            cell.innerHTML = `<img src="${imgPath}" onerror="this.style.opacity='0.1';">`;
+
+            cell.onclick = () => {
+                clearTimeout(autoTimer);
+                logTrial(emo);
+                runTrialCycle();
+            };
+            grid.appendChild(cell);
+        });
+    }
+
+    function logTrial(choice) {
+        const reactionTime = (performance.now() - trialStartTime).toFixed(0);
+        results.push({
+            trial: currentTrial,
+            choice: choice,
+            tttf_ms: choice === 'timeout' ? 3000 : reactionTime
+        });
+    }
+
+    init();
+</script>
+
+</body>
+</html>
