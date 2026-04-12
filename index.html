@@ -6,42 +6,37 @@
     <title>SAL-E Research App</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Updated to Light Mode */
-        body { background: #f4f4f7; color: #1c1c1e; font-family: -apple-system, system-ui, sans-serif; overflow: hidden; }
-        #phone-shell { width: 375px; height: 812px; border: 12px solid #000; border-radius: 50px; position: relative; overflow: hidden; margin: 20px auto; display: flex; flex-direction: column; background: #fff; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.2); }
+        /* Light Mode UI */
+        body { background: #ffffff; color: #1c1c1e; font-family: -apple-system, system-ui, sans-serif; overflow: hidden; }
+        #phone-shell { width: 375px; height: 812px; border: 12px solid #111; border-radius: 50px; position: relative; overflow: hidden; margin: 20px auto; display: flex; flex-direction: column; background: #fff; box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
         .screen { display: none; height: 100%; flex-direction: column; padding: 40px 24px; }
         .active { display: flex; }
-        .face-grid { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 8px; margin: auto 0; width: 100%; aspect-ratio: 1/1; }
-        .face-cell { background: #eee; border-radius: 12px; overflow: hidden; position: relative; border: 1px solid #ddd; cursor: pointer; }
+        .face-grid { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 10px; margin: auto 0; width: 100%; aspect-ratio: 1/1; }
+        .face-cell { background: #f4f4f7; border-radius: 12px; overflow: hidden; border: 1px solid #e5e5ea; }
         .face-cell img { width: 100%; height: 100%; object-fit: cover; }
-        .fixation-cross { font-size: 60px; font-weight: 300; margin: auto; color: #000; }
-        .btn-ios { background: #007AFF; padding: 18px; border-radius: 14px; font-weight: 600; text-align: center; margin-top: auto; cursor: pointer; color: white; font-size: 16px; }
-        input[type=range] { width: 100%; accent-color: #007AFF; }
+        .fixation-cross { font-size: 70px; font-weight: 200; margin: auto; color: #000; }
+        .btn-ios { background: #007AFF; padding: 18px; border-radius: 14px; font-weight: 600; text-align: center; margin-top: auto; cursor: pointer; color: white; border: none; }
+        input[type=range] { width: 100%; accent-color: #007AFF; margin: 15px 0; }
     </style>
 </head>
 <body>
 
 <div id="phone-shell">
-    <div id="screen-loading" class="screen active justify-center items-center">
-        <p class="text-zinc-400 animate-pulse text-sm">Loading Manifest...</p>
-    </div>
-
-    <div id="screen-setup" class="screen flex-col pt-16">
-        <h1 class="text-3xl font-bold mb-1">SAL-E</h1>
-        <p class="text-zinc-400 text-xs mb-10 uppercase tracking-widest">Research Prototype</p>
+    <div id="screen-setup" class="screen active pt-16">
+        <h1 class="text-3xl font-extrabold mb-1">SAL-E</h1>
+        <p class="text-zinc-400 text-[10px] uppercase tracking-[0.2em] mb-12">Social Anxiety Research</p>
         
-        <label class="text-[10px] uppercase text-zinc-500 font-bold mb-2">Target Group</label>
-        <select id="race-select" class="bg-zinc-100 p-4 rounded-xl mb-6 outline-none border border-zinc-200">
-            <option value="white">White (WF & WM)</option>
-            <option value="black">Black (BF & BM)</option>
+        <label class="text-[11px] font-bold text-zinc-500 uppercase">Stimulus Ethnicity</label>
+        <select id="race-select" class="bg-zinc-100 p-4 rounded-xl mb-8 border border-zinc-200 outline-none">
+            <option value="white">WHITE (WF & WM)</option>
+            <option value="black">BLACK (BF & BM)</option>
         </select>
 
-        <label class="text-[10px] uppercase text-zinc-500 font-bold mb-2">Display Duration: <span id="dur-val">5</span>s</label>
-        <input type="range" id="duration-slider" min="3000" max="10000" step="500" value="5000" 
-               oninput="document.getElementById('dur-val').innerText = (this.value/1000).toFixed(1)">
-        <p class="text-[9px] text-zinc-400 mt-1 mb-8">Time images remain visible before auto-advance.</p>
-
-        <button onclick="startStudy()" class="btn-ios">Start Block</button>
+        <label class="text-[11px] font-bold text-zinc-500 uppercase">Trial Duration: <span id="dur-label">5</span>s</label>
+        <input type="range" id="duration-slider" min="3000" max="10000" step="1000" value="5000" 
+               oninput="document.getElementById('dur-label').innerText = this.value/1000">
+        
+        <button onclick="startStudy()" class="btn-ios">Start Study</button>
     </div>
 
     <div id="screen-fixation" class="screen justify-center items-center">
@@ -49,13 +44,13 @@
     </div>
 
     <div id="screen-trial" class="screen">
-        <div id="progress" class="text-center text-[10px] text-zinc-400 font-bold mb-4">TRIAL</div>
+        <div id="progress" class="text-center text-[10px] text-zinc-400 font-bold mb-4 tracking-widest">TRIAL</div>
         <div class="face-grid" id="face-grid"></div>
     </div>
 
     <div id="screen-done" class="screen justify-center items-center text-center">
-        <h2 class="text-xl font-bold mb-2">Complete</h2>
-        <button onclick="location.reload()" class="text-blue-500 mt-4">Restart</button>
+        <h2 class="text-xl font-bold mb-4">Data Recorded</h2>
+        <button onclick="location.reload()" class="text-blue-500 font-bold">New Session</button>
     </div>
 </div>
 
@@ -66,14 +61,12 @@
     let trialStartTime;
     let autoTimer;
 
+    // Load your manifest.json
     async function init() {
         try {
-            const response = await fetch(`manifest.json?v=${Date.now()}`);
-            manifest = await response.json();
-            showScreen('screen-setup');
-        } catch (e) {
-            document.getElementById('screen-loading').innerText = "Error loading manifest.json";
-        }
+            const resp = await fetch('manifest.json');
+            manifest = await resp.json();
+        } catch (e) { console.error("Manifest missing"); }
     }
 
     function showScreen(id) {
@@ -89,7 +82,6 @@
 
     function runTrialCycle() {
         if (currentTrial >= 16) {
-            console.table(results);
             showScreen('screen-done');
             return;
         }
@@ -102,52 +94,38 @@
             showScreen('screen-trial');
             trialStartTime = performance.now();
             
-            const displayTime = parseInt(document.getElementById('duration-slider').value);
-            autoTimer = setTimeout(() => {
-                logTrial('timeout');
-                runTrialCycle();
-            }, displayTime);
+            const limit = parseInt(document.getElementById('duration-slider').value);
+            autoTimer = setTimeout(() => { logTrial('timeout'); runTrialCycle(); }, limit);
         }, 1500);
     }
 
     function renderTrial() {
         const grid = document.getElementById('face-grid');
         grid.innerHTML = '';
-        
         const selection = document.getElementById('race-select').value;
-        let pool = [];
         
-        // Combine subfolders based on selection
+        // Bundle the folders together
+        let folders = [];
         if (selection === 'white') {
-            // map folders to include their parent prefix
-            pool = [...manifest.WF.map(id => `WF/${id}`), ...manifest.WM.map(id => `WM/${id}`)];
+            folders = [...manifest.WF.map(id => `WF/${id}`), ...manifest.WM.map(id => `WM/${id}`)];
         } else {
-            pool = [...manifest.BF.map(id => `BF/${id}`), ...manifest.BM.map(id => `BM/${id}`)];
+            folders = [...manifest.BF.map(id => `BF/${id}`), ...manifest.BM.map(id => `BM/${id}`)];
         }
 
-        // Pick one random subfolder path (e.g., "WF/WF06")
-        const randomPath = pool[Math.floor(Math.random() * pool.length)];
+        const randomFolder = folders[Math.floor(Math.random() * folders.length)];
         const emotions = ['NC', 'AO', 'SC', 'FC'].sort(() => Math.random() - 0.5);
 
         emotions.forEach(emo => {
             const cell = document.createElement('div');
             cell.className = "face-cell aspect-square";
-            cell.innerHTML = `<img src="${randomPath}/${emo}.jpg" onerror="this.src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='">`;
-            cell.onclick = () => {
-                clearTimeout(autoTimer);
-                logTrial(emo);
-                runTrialCycle();
-            };
+            cell.innerHTML = `<img src="${randomFolder}/${emo}.jpg">`;
+            cell.onclick = () => { clearTimeout(autoTimer); logTrial(emo); runTrialCycle(); };
             grid.appendChild(cell);
         });
     }
 
     function logTrial(choice) {
-        results.push({
-            trial: currentTrial,
-            choice: choice,
-            rt: (performance.now() - trialStartTime).toFixed(0)
-        });
+        results.push({ trial: currentTrial, choice, rt: (performance.now() - trialStartTime).toFixed(0) });
     }
 
     init();
