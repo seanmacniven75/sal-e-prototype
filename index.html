@@ -6,169 +6,165 @@
     <title>SAL-E Research App</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Light Mode UI */
         body { background: #ffffff; color: #1c1c1e; font-family: -apple-system, system-ui, sans-serif; overflow: hidden; }
         #phone-shell { width: 375px; height: 812px; border: 12px solid #111; border-radius: 50px; position: relative; overflow: hidden; margin: 20px auto; display: flex; flex-direction: column; background: #fff; box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
         .screen { display: none; height: 100%; flex-direction: column; padding: 40px 24px; }
         .active { display: flex; }
-        .face-grid { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 10px; margin: auto 0; width: 100%; aspect-ratio: 1/1; }
-        .face-cell { background: #f4f4f7; border-radius: 12px; overflow: hidden; border: 1px solid #e5e5ea; cursor: pointer; position: relative; }
+        
+        /* Grid Layouts */
+        .grid-2x2 { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 10px; margin: auto 0; }
+        .grid-1x2 { display: grid; grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; gap: 15px; height: 100%; padding: 20px 0; }
+        .grid-single { display: grid; grid-template-columns: 1fr; place-items: center; height: 100%; }
+
+        .face-cell { background: #f4f4f7; border-radius: 12px; overflow: hidden; border: 1px solid #e5e5ea; cursor: pointer; }
         .face-cell img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
+        
         .fixation-cross { font-size: 70px; font-weight: 200; margin: auto; color: #000; }
-        .btn-ios { background: #007AFF; padding: 18px; border-radius: 14px; font-weight: 600; text-align: center; margin-top: auto; cursor: pointer; color: white; border: none; font-size: 16px; transition: opacity 0.2s; }
-        .btn-ios:active { opacity: 0.7; }
-        input[type=range] { width: 100%; accent-color: #007AFF; margin: 15px 0; }
+        .btn-ios { background: #007AFF; padding: 18px; border-radius: 14px; font-weight: 600; text-align: center; margin-top: auto; cursor: pointer; color: white; border: none; font-size: 16px; }
+        select, input[type=range] { width: 100%; background: #f4f4f7; padding: 12px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #e5e5ea; outline: none; }
     </style>
 </head>
 <body>
 
 <div id="phone-shell">
-    <div id="screen-setup" class="screen active pt-16">
-        <h1 class="text-3xl font-extrabold mb-1">SAL-E</h1>
-        <p class="text-zinc-400 text-[10px] uppercase tracking-[0.2em] mb-12">Social Anxiety Research</p>
+    <div id="screen-setup" class="screen active pt-12">
+        <h1 class="text-3xl font-extrabold mb-2">SAL-E</h1>
+        <p class="text-zinc-400 text-[10px] uppercase tracking-widest mb-8">Stimulus Configuration</p>
         
-        <label class="text-[11px] font-bold text-zinc-500 uppercase">Stimulus Group</label>
-        <select id="race-select" class="bg-zinc-100 p-4 rounded-xl mb-8 border border-zinc-200 outline-none">
+        <label class="text-[11px] font-bold text-zinc-500 uppercase">Ethnicity</label>
+        <select id="race-select">
             <option value="white">WHITE (WF & WM)</option>
             <option value="black">BLACK (BF & BM)</option>
         </select>
 
-        <label class="text-[11px] font-bold text-zinc-500 uppercase">Trial Duration: <span id="dur-label">5</span>s</label>
-        <input type="range" id="duration-slider" min="3000" max="10000" step="1000" value="5000" 
-               oninput="document.getElementById('dur-label').innerText = this.value/1000">
-        <p class="text-[10px] text-zinc-400">Duration images remain visible.</p>
+        <label class="text-[11px] font-bold text-zinc-500 uppercase">Presentation Mode</label>
+        <select id="layout-select">
+            <option value="2x2">Option 1: 2x2 (16 Trials)</option>
+            <option value="1x2">Option 2: 1x2 (32 Trials)</option>
+            <option value="single">Option 3: Single (64 Trials)</option>
+        </select>
+
+        <label class="text-[11px] font-bold text-zinc-500 uppercase">Duration: <span id="dur-label">5</span>s</label>
+        <input type="range" id="duration-slider" min="3000" max="10000" step="1000" value="5000" oninput="document.getElementById('dur-label').innerText = this.value/1000">
         
-        <button onclick="startStudy()" class="btn-ios">Start Block (16 Trials)</button>
+        <button onclick="startStudy()" class="btn-ios">Start Session</button>
     </div>
 
-    <div id="screen-fixation" class="screen justify-center items-center">
-        <div class="fixation-cross">+</div>
-    </div>
+    <div id="screen-fixation" class="screen justify-center items-center"><div class="fixation-cross">+</div></div>
 
     <div id="screen-trial" class="screen">
         <div id="progress" class="text-center text-[10px] text-zinc-400 font-bold mb-4 tracking-widest uppercase">Trial</div>
-        <div class="face-grid" id="face-grid"></div>
+        <div id="face-grid-container" class="flex-grow flex flex-col justify-center"></div>
     </div>
 
     <div id="screen-done" class="screen justify-center items-center text-center">
-        <h2 class="text-xl font-bold mb-2">Block Complete</h2>
-        <p class="text-zinc-500 text-sm mb-8">All 16 trials recorded.</p>
-        <button onclick="location.reload()" class="text-blue-500 font-bold px-6 py-2 border border-blue-100 rounded-full">Restart Session</button>
+        <h2 class="text-xl font-bold mb-4">Block Complete</h2>
+        <button onclick="location.reload()" class="text-blue-500 font-bold">Restart Session</button>
     </div>
 </div>
 
 <script>
     let manifest = null;
-    let currentTrial = 0;
+    let trialQueue = [];
+    let currentTrialIdx = 0;
     let results = [];
     let trialStartTime;
     let autoTimer;
-    let shuffledPool = [];
 
-    // 1. Initial Load - get manifest
     async function init() {
         try {
             const resp = await fetch(`manifest.json?v=${Date.now()}`);
             manifest = await resp.json();
-        } catch (e) {
-            console.error("Manifest missing or invalid.");
-        }
+        } catch (e) { console.error("Manifest error"); }
     }
 
-    function showScreen(id) {
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-    }
-
-    // 2. Start Logic with "Shuffled Deck" to prevent repeats
-    function startStudy() {
-        const selection = document.getElementById('race-select').value;
-        let folders = [];
-        
-        // Bundle folders as requested
-        if (selection === 'white') {
-            folders = [...manifest.WF.map(id => `WF/${id}`), ...manifest.WM.map(id => `WM/${id}`)];
-        } else {
-            folders = [...manifest.BF.map(id => `BF/${id}`), ...manifest.BM.map(id => `BM/${id}`)];
-        }
-
-        // Fisher-Yates Shuffle
-        for (let i = folders.length - 1; i > 0; i--) {
+    function shuffle(array) {
+        for (let i = array.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
-            [folders[i], folders[j]] = [folders[j], folders[i]];
+            [array[i], array[j]] = [array[j], array[i]];
         }
-        
-        shuffledPool = folders;
-        currentTrial = 0;
+        return array;
+    }
+
+    function startStudy() {
+        const race = document.getElementById('race-select').value;
+        const layout = document.getElementById('layout-select').value;
+        let folders = (race === 'white') ? 
+            [...manifest.WF.map(id => `WF/${id}`), ...manifest.WM.map(id => `WM/${id}`)] : 
+            [...manifest.BF.map(id => `BF/${id}`), ...manifest.BM.map(id => `BM/${id}`)];
+
+        trialQueue = [];
+
+        if (layout === '2x2') {
+            shuffle(folders).forEach(path => {
+                trialQueue.push({ path, emotions: shuffle(['NC', 'AO', 'SC', 'FC']), layout: 'grid-2x2' });
+            });
+        } 
+        else if (layout === '1x2') {
+            folders.forEach(path => {
+                let emos = shuffle(['NC', 'AO', 'SC', 'FC']);
+                trialQueue.push({ path, emotions: [emos[0], emos[1]], layout: 'grid-1x2' });
+                trialQueue.push({ path, emotions: [emos[2], emos[3]], layout: 'grid-1x2' });
+            });
+            shuffle(trialQueue); // Shuffle all 32 pairs so identities are mixed
+        } 
+        else if (layout === 'single') {
+            folders.forEach(path => {
+                ['NC', 'AO', 'SC', 'FC'].forEach(e => {
+                    trialQueue.push({ path, emotions: [e], layout: 'grid-single' });
+                });
+            });
+            shuffle(trialQueue); // Shuffle all 64 individual images
+        }
+
+        currentTrialIdx = 0;
         results = [];
         runTrialCycle();
     }
 
-    // 3. Trial Cycle logic
     function runTrialCycle() {
-        // Stop after 16 trials or when deck is empty
-        if (currentTrial >= 16 || currentTrial >= shuffledPool.length) {
-            console.log("Session Data:", results);
+        if (currentTrialIdx >= trialQueue.length) {
+            console.table(results);
             showScreen('screen-done');
             return;
         }
 
-        currentTrial++;
-        document.getElementById('progress').innerText = `TRIAL ${currentTrial} / 16`;
+        document.getElementById('progress').innerText = `TRIAL ${currentTrialIdx + 1} / ${trialQueue.length}`;
         showScreen('screen-fixation');
 
-        // Fixation cross for 1.5s
         setTimeout(() => {
             renderTrial();
             showScreen('screen-trial');
             trialStartTime = performance.now();
-            
-            // Set auto-advance timer based on slider
-            const limit = parseInt(document.getElementById('duration-slider').value);
-            autoTimer = setTimeout(() => { 
-                logTrial('timeout'); 
-                runTrialCycle(); 
-            }, limit);
+            autoTimer = setTimeout(() => { logTrial('timeout'); runTrialCycle(); }, parseInt(document.getElementById('duration-slider').value));
         }, 1500);
     }
 
-    // 4. Generate the 2x2 grid
     function renderTrial() {
+        const container = document.getElementById('face-grid-container');
+        const trial = trialQueue[currentTrialIdx];
+        container.innerHTML = `<div id="face-grid" class="${trial.layout}"></div>`;
         const grid = document.getElementById('face-grid');
-        grid.innerHTML = '';
-        
-        // Pick unique folder from the shuffled deck
-        const currentPath = shuffledPool[currentTrial - 1];
-        
-        // Randomize emotion positions in the grid
-        const emotions = ['NC', 'AO', 'SC', 'HO'].sort(() => Math.random() - 0.5);
 
-        emotions.forEach(emo => {
+        trial.emotions.forEach(emo => {
             const cell = document.createElement('div');
-            cell.className = "face-cell aspect-square";
-            
-            const img = new Image();
-            img.src = `${currentPath}/${emo}.jpg`;
-            // If image fails, hide it so the researcher knows there's a missing file
-            img.onerror = function() { this.style.opacity = '0'; }; 
-            
-            cell.appendChild(img);
-            cell.onclick = () => { 
-                clearTimeout(autoTimer); 
-                logTrial(emo); 
-                runTrialCycle(); 
-            };
+            cell.className = (trial.layout === 'grid-single') ? "face-cell w-full aspect-square" : "face-cell w-full aspect-square";
+            cell.innerHTML = `<img src="${trial.path}/${emo}.jpg">`;
+            cell.onclick = () => { clearTimeout(autoTimer); logTrial(emo); runTrialCycle(); };
             grid.appendChild(cell);
         });
     }
 
     function logTrial(choice) {
+        const t = trialQueue[currentTrialIdx];
         results.push({ 
-            trial: currentTrial, 
-            identity: shuffledPool[currentTrial-1], 
+            trial: currentTrialIdx + 1, 
+            id: t.path, 
+            stimuli: t.emotions.join(','),
             choice: choice, 
             rt: (performance.now() - trialStartTime).toFixed(0) 
         });
+        currentTrialIdx++;
     }
 
     init();
