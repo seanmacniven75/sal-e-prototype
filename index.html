@@ -8,58 +8,67 @@
     <style>
         body { background: #ffffff; color: #1c1c1e; font-family: -apple-system, system-ui, sans-serif; overflow: hidden; }
         #phone-shell { width: 375px; height: 812px; border: 12px solid #111; border-radius: 50px; position: relative; overflow: hidden; margin: 20px auto; display: flex; flex-direction: column; background: #fff; box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
-        .screen { display: none; height: 100%; flex-direction: column; padding: 40px 24px; }
+        .screen { display: none; height: 100%; flex-direction: column; padding: 40px 30px; }
         .active { display: flex; }
         
-        /* Grid Layouts */
+        /* Layout Grids */
         .grid-2x2 { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 10px; margin: auto 0; }
         .grid-1x2 { display: grid; grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; gap: 15px; height: 100%; padding: 20px 0; }
         .grid-single { display: grid; grid-template-columns: 1fr; place-items: center; height: 100%; }
 
-        .face-cell { background: #f4f4f7; border-radius: 12px; overflow: hidden; border: 1px solid #e5e5ea; cursor: pointer; }
+        .face-cell { background: #f8fafc; border-radius: 12px; overflow: hidden; border: 1px solid #e2e8f0; cursor: pointer; transition: transform 0.1s; }
+        .face-cell:active { transform: scale(0.98); }
         .face-cell img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
         
         .fixation-cross { font-size: 70px; font-weight: 200; margin: auto; color: #000; }
-        .btn-ios { background: #007AFF; padding: 18px; border-radius: 14px; font-weight: 600; text-align: center; margin-top: auto; cursor: pointer; color: white; border: none; font-size: 16px; }
-        select, input[type=range] { width: 100%; background: #f4f4f7; padding: 12px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #e5e5ea; outline: none; }
+        
+        /* Teal Theme & Spacing */
+        .btn-teal { background: #14b8a6; padding: 18px; border-radius: 14px; font-weight: 600; text-align: center; margin-top: auto; cursor: pointer; color: white; border: none; font-size: 16px; transition: background 0.2s; }
+        .btn-teal:active { background: #0d9488; }
+        .btn-teal:disabled { background: #ccf2ee; color: #5eead4; cursor: not-allowed; }
+
+        label { display: block; margin-bottom: 8px; font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; }
+        select, input[type=range] { width: 100%; background: #f8fafc; padding: 14px; border-radius: 12px; margin-bottom: 32px; border: 1px solid #e2e8f0; outline: none; appearance: none; }
+        input[type=range] { accent-color: #14b8a6; height: 6px; margin-top: 8px; }
     </style>
 </head>
 <body>
 
 <div id="phone-shell">
-    <div id="screen-setup" class="screen active pt-12">
-        <h1 class="text-3xl font-extrabold mb-2">SAL-E</h1>
-        <p class="text-zinc-400 text-[10px] uppercase tracking-widest mb-8">Stimulus Configuration</p>
+    <div id="screen-setup" class="screen active pt-16">
+        <h1 class="text-4xl font-black mb-2 tracking-tight">SAL-E</h1>
+        <p class="text-zinc-400 text-[10px] uppercase tracking-[0.2em] mb-12">Stimulus Configuration</p>
         
-        <label class="text-[11px] font-bold text-zinc-500 uppercase">Ethnicity</label>
+        <label>Ethnicity</label>
         <select id="race-select">
             <option value="white">WHITE (WF & WM)</option>
             <option value="black">BLACK (BF & BM)</option>
         </select>
 
-        <label class="text-[11px] font-bold text-zinc-500 uppercase">Presentation Mode</label>
+        <label>Presentation Mode</label>
         <select id="layout-select">
-            <option value="2x2">Option 1: 2x2 (16 Trials)</option>
-            <option value="1x2">Option 2: 1x2 (32 Trials)</option>
-            <option value="single">Option 3: Single (64 Trials)</option>
+            <option value="2x2">Option 1: 2x2 Grid (16 Trials)</option>
+            <option value="1x2">Option 2: 1x2 Portrait (32 Trials)</option>
+            <option value="single">Option 3: Single Face (64 Trials)</option>
         </select>
 
-        <label class="text-[11px] font-bold text-zinc-500 uppercase">Duration: <span id="dur-label">5</span>s</label>
+        <label>Duration: <span id="dur-label" class="text-teal-600">5</span>s</label>
         <input type="range" id="duration-slider" min="3000" max="10000" step="1000" value="5000" oninput="document.getElementById('dur-label').innerText = this.value/1000">
         
-        <button onclick="startStudy()" class="btn-ios">Start Session</button>
+        <button id="start-btn" onclick="startStudy()" class="btn-teal" disabled>Loading Data...</button>
     </div>
 
     <div id="screen-fixation" class="screen justify-center items-center"><div class="fixation-cross">+</div></div>
 
     <div id="screen-trial" class="screen">
-        <div id="progress" class="text-center text-[10px] text-zinc-400 font-bold mb-4 tracking-widest uppercase">Trial</div>
+        <div id="progress" class="text-center text-[10px] text-zinc-400 font-bold mb-6 tracking-widest uppercase">Trial</div>
         <div id="face-grid-container" class="flex-grow flex flex-col justify-center"></div>
     </div>
 
     <div id="screen-done" class="screen justify-center items-center text-center">
-        <h2 class="text-xl font-bold mb-4">Block Complete</h2>
-        <button onclick="location.reload()" class="text-blue-500 font-bold">Restart Session</button>
+        <h2 class="text-2xl font-bold mb-2">Block Complete</h2>
+        <p class="text-zinc-500 text-sm mb-12">Session successfully recorded.</p>
+        <button onclick="location.reload()" class="text-teal-600 font-bold border-2 border-teal-50 px-8 py-3 rounded-full">Restart Session</button>
     </div>
 </div>
 
@@ -71,11 +80,20 @@
     let trialStartTime;
     let autoTimer;
 
+    // Load data from manifest.json
     async function init() {
         try {
             const resp = await fetch(`manifest.json?v=${Date.now()}`);
+            if (!resp.ok) throw new Error("Manifest not found");
             manifest = await resp.json();
-        } catch (e) { console.error("Manifest error"); }
+            
+            const btn = document.getElementById('start-btn');
+            btn.disabled = false;
+            btn.innerText = "Start Session";
+        } catch (e) {
+            document.getElementById('start-btn').innerText = "Manifest Error";
+            console.error(e);
+        }
     }
 
     function shuffle(array) {
@@ -86,9 +104,17 @@
         return array;
     }
 
+    function showScreen(id) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+    }
+
     function startStudy() {
+        if (!manifest) return;
+
         const race = document.getElementById('race-select').value;
         const layout = document.getElementById('layout-select').value;
+        
         let folders = (race === 'white') ? 
             [...manifest.WF.map(id => `WF/${id}`), ...manifest.WM.map(id => `WM/${id}`)] : 
             [...manifest.BF.map(id => `BF/${id}`), ...manifest.BM.map(id => `BM/${id}`)];
@@ -106,7 +132,7 @@
                 trialQueue.push({ path, emotions: [emos[0], emos[1]], layout: 'grid-1x2' });
                 trialQueue.push({ path, emotions: [emos[2], emos[3]], layout: 'grid-1x2' });
             });
-            shuffle(trialQueue); // Shuffle all 32 pairs so identities are mixed
+            shuffle(trialQueue);
         } 
         else if (layout === 'single') {
             folders.forEach(path => {
@@ -114,7 +140,7 @@
                     trialQueue.push({ path, emotions: [e], layout: 'grid-single' });
                 });
             });
-            shuffle(trialQueue); // Shuffle all 64 individual images
+            shuffle(trialQueue);
         }
 
         currentTrialIdx = 0;
@@ -148,8 +174,8 @@
 
         trial.emotions.forEach(emo => {
             const cell = document.createElement('div');
-            cell.className = (trial.layout === 'grid-single') ? "face-cell w-full aspect-square" : "face-cell w-full aspect-square";
-            cell.innerHTML = `<img src="${trial.path}/${emo}.jpg">`;
+            cell.className = "face-cell w-full aspect-square";
+            cell.innerHTML = `<img src="${trial.path}/${emo}.jpg" onerror="this.style.opacity='0'">`;
             cell.onclick = () => { clearTimeout(autoTimer); logTrial(emo); runTrialCycle(); };
             grid.appendChild(cell);
         });
