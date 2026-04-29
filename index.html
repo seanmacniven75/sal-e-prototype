@@ -189,17 +189,21 @@
         /* Screen -1: Landing (first launch only) */
         .screen.screen-landing {
             text-align: center;
-            padding: 20px 18px calc(20px + env(safe-area-inset-bottom, 16px));
+            padding-top: max(32px, calc(env(safe-area-inset-top, 0px) + 28px));
+            padding-left: 18px;
+            padding-right: 18px;
+            padding-bottom: calc(20px + env(safe-area-inset-bottom, 16px));
             justify-content: flex-start;
         }
-        .landing-hero {
+        .landing-inner {
             flex: 1 1 0;
             min-height: 0;
             display: flex;
+            flex-direction: column;
             align-items: center;
-            justify-content: center;
+            justify-content: space-evenly;
             width: 100%;
-            padding: 12px 0 8px;
+            gap: clamp(10px, 2.8vh, 22px);
         }
         .landing-logo-wrap {
             width: min(92%, 340px);
@@ -216,12 +220,6 @@
             object-fit: contain;
             object-position: center center;
         }
-        .landing-copy {
-            flex-shrink: 0;
-            width: 100%;
-            max-width: 320px;
-            margin: 0 auto;
-        }
         .researcher-logo-img {
             max-width: 200px;
             width: min(52%, 200px);
@@ -233,22 +231,25 @@
         }
         .landing-tagline {
             font-size: 13px; font-weight: 600; color: var(--body); line-height: 1.4;
-            margin: 0 auto 14px;
+            margin: 0 auto;
+            max-width: 320px;
         }
         .landing-affiliation {
             font-size: 12px; color: var(--muted); line-height: 1.45;
-            margin: 0 auto 12px;
+            margin: 0 auto;
+            max-width: 320px;
         }
         .landing-kcl-mark {
-            width: 36px; height: 44px; margin: 0 auto 16px; color: var(--teal);
+            width: 36px; height: 44px; margin: 0 auto; color: var(--teal);
             opacity: 0.85;
         }
         .landing-kcl-mark svg { width: 100%; height: 100%; display: block; }
         .landing-welcome {
             font-size: 16px; line-height: 1.5; text-align: center;
-            margin: 0 auto 6px; color: var(--body);
+            margin: 0 auto; color: var(--body);
+            max-width: 320px;
         }
-        .landing-actions { margin-top: auto; padding-top: 16px; width: 100%; flex-shrink: 0; }
+        .landing-actions { margin-top: auto; padding-top: 20px; width: 100%; flex-shrink: 0; }
         .landing-link-account {
             background: none; border: none; color: var(--teal); font-weight: 600;
             font-size: 15px; text-decoration: underline; cursor: pointer; width: 100%;
