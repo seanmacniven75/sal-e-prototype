@@ -56,16 +56,16 @@
             -webkit-tap-highlight-color: transparent;
         }
         #btn-stop-session.hidden { display: none !important; }
+        /* Plain text only: colour differs between prominent (red) and subtle (grey) */
         #btn-stop-session.stop-affordance--prominent {
-            display: inline-flex; align-items: center; justify-content: center;
-            background: #fff5f5; color: #dc2626; border: 1px solid #fecaca;
-            border-radius: 8px; padding: 8px 10px; min-height: 40px; min-width: 40px;
+            background: transparent; border: none; border-radius: 0; box-shadow: none;
+            color: #dc2626; padding: 14px 10px; min-height: 44px; min-width: 44px;
             font-size: 12px; font-weight: 800; letter-spacing: 0.06em;
         }
         #btn-stop-session.stop-affordance--subtle {
-            background: transparent; color: #9ca3af; border: none;
-            border-radius: 10px; padding: 14px 12px; min-height: 44px; min-width: 44px;
-            font-size: 13px; font-weight: 600; letter-spacing: 0.06em;
+            background: transparent; border: none; border-radius: 0; box-shadow: none;
+            color: #9ca3af; padding: 14px 10px; min-height: 44px; min-width: 44px;
+            font-size: 12px; font-weight: 800; letter-spacing: 0.06em;
         }
 
         .text-link { color: var(--teal); font-weight: 600; text-decoration: underline; font-size: 16px; }
@@ -376,7 +376,7 @@
             <input type="range" id="pre-anxiety" class="vas" min="0" max="100" value="50">
             <div class="vas-labels"><span>Not at all anxious</span><span>Extremely anxious</span></div>
         </div>
-        <p class="hint">Today's session will take about 10 minutes. You can stop at any time using STOP SESSION at the top of the screen (during face blocks it appears in grey so it stays easy to tap but less visually prominent).</p>
+        <p class="hint">Today's session will take about 10 minutes. You can stop at any time using STOP SESSION at the top of the screen (during face blocks the same label appears in grey).</p>
         <div class="btn-row">
             <button type="button" id="welcome-continue" class="btn-teal">Continue</button>
         </div>
