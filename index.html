@@ -3,233 +3,1159 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SAL-E Research App</title>
+    <title>SAL-E</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background: #ffffff; color: #1c1c1e; font-family: -apple-system, system-ui, sans-serif; overflow: hidden; }
-        #phone-shell { width: 375px; height: 812px; border: 12px solid #111; border-radius: 50px; position: relative; overflow: hidden; margin: 20px auto; display: flex; flex-direction: column; background: #fff; box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
-        .screen { display: none; height: 100%; flex-direction: column; padding: 30px 24px; position: relative; }
-        .active { display: flex; }
-        
-        /* Layout Grids */
-        .grid-1x2 { display: grid; grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; gap: 12px; height: 100%; padding: 10px 0; }
-        .grid-single { display: grid; grid-template-columns: 1fr; place-items: center; height: 100%; }
+        :root {
+            --teal: #1FB8B0;
+            --teal-dark: #159a94;
+            --body: #1a1a1a;
+            --muted: #6b7280;
+        }
+        body { background: #ffffff; color: var(--body); font-family: -apple-system, BlinkMacSystemFont, system-ui, sans-serif; overflow: auto; font-size: 17px; line-height: 1.45; }
+        #phone-shell {
+            width: 375px; min-height: 812px; height: 812px;
+            border: 12px solid #111; border-radius: 50px; position: relative; overflow: hidden;
+            margin: 20px auto; display: flex; flex-direction: column; background: #fff;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.12);
+        }
+        .screen {
+            display: none; flex: 1; flex-direction: column;
+            padding: 28px 22px 24px; position: relative; min-height: 0;
+            overflow-y: auto;
+        }
+        .screen.active { display: flex; }
+        .screen.has-stop { padding-top: 48px; }
 
-        .face-cell { background: #f8fafc; border-radius: 12px; overflow: hidden; border: 1px solid #e2e8f0; cursor: pointer; }
-        .face-cell img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
-        .fixation-cross { font-size: 70px; font-weight: 200; margin: auto; color: #000; }
-        
-        /* Teal Theme Branding */
-        .text-teal { color: #14b8a6 !important; }
-        .btn-teal { background-color: #14b8a6 !important; padding: 16px; border-radius: 14px; font-weight: 600; text-align: center; margin-top: auto; cursor: pointer; color: white !important; border: none; font-size: 16px; flex-shrink: 0; }
-        .btn-teal:disabled { background-color: #ccf2ee !important; color: #5eead4 !important; }
+        h1 { font-size: 1.35rem; font-weight: 800; color: var(--teal); margin-bottom: 0.5rem; }
+        h2 { font-size: 1.2rem; font-weight: 700; color: var(--teal); margin-bottom: 0.5rem; }
+        .subtle { font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+        p, .body-text { color: var(--body); font-size: 17px; margin-bottom: 0.75rem; }
+        .hint { font-size: 14px; color: var(--muted); }
 
-        /* Subtle Teal Exit Button */
-        .footer-exit { 
-            position: absolute; 
-            bottom: 20px; 
-            left: 24px; 
-            right: 24px; 
-            opacity: 0.85; 
-            background: #f0fdfa; 
-            color: #0d9488; 
-            text-align: center; 
-            padding: 12px; 
-            border-radius: 12px; 
-            font-size: 11px; 
-            font-weight: 700; 
-            text-transform: uppercase; 
-            letter-spacing: 0.08em; 
-            cursor: pointer; 
-            border: 1px solid #99f6e4; 
+        .btn-teal {
+            background: var(--teal); color: #fff !important; border: none; border-radius: 14px;
+            padding: 16px 18px; font-size: 16px; font-weight: 600; width: 100%; cursor: pointer;
+            margin-top: 10px; flex-shrink: 0;
+        }
+        .btn-teal:disabled { background: #b8e8e4; color: #fff !important; cursor: not-allowed; }
+        .btn-outline {
+            background: #fff; color: var(--teal) !important; border: 2px solid var(--teal); border-radius: 14px;
+            padding: 14px 18px; font-size: 16px; font-weight: 600; width: 100%; cursor: pointer; margin-top: 10px;
+        }
+        .btn-danger-text {
+            background: none; border: none; color: #dc2626; font-weight: 700; font-size: 16px;
+            width: 100%; padding: 14px; cursor: pointer; margin-top: 6px;
+        }
+        .btn-row { display: flex; flex-direction: column; gap: 0; margin-top: auto; padding-top: 16px; }
+
+        #btn-stop-session {
+            position: absolute; top: 10px; right: 14px; z-index: 300;
+            background: #fff; color: #dc2626; border: none;
+            font-size: 11px; font-weight: 800; letter-spacing: 0.06em;
+            padding: 8px 8px; cursor: pointer; font-family: inherit;
+        }
+        #btn-stop-session.hidden { display: none !important; }
+
+        .grid-1x2 {
+            display: grid; grid-template-columns: 1fr; grid-template-rows: 1fr 1fr;
+            gap: 12px; flex: 1; min-height: 200px; padding: 8px 0;
+        }
+        .face-cell {
+            background: #f8fafc; border-radius: 12px; overflow: hidden;
+            border: 1px solid #e2e8f0;
+        }
+        .face-cell img { width: 100%; height: 100%; object-fit: cover; display: block; aspect-ratio: 1; }
+
+        .fixation-cross { font-size: 64px; font-weight: 200; color: #000; margin: auto; }
+
+        .trial-progress {
+            text-align: center; font-size: 11px; color: var(--muted); font-weight: 600;
+            margin-bottom: 8px;
         }
 
-        /* Segmented Buttons Control */
-        .section-block { margin-bottom: 20px; } 
-        label.section-title { display: block; margin-bottom: 8px; font-size: 10px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em; }
+        .section-block { margin-bottom: 18px; }
+        label.section-title {
+            display: block; margin-bottom: 8px; font-size: 10px; font-weight: 800;
+            color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em;
+        }
         .segmented-group { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
         .segmented-group.three-cols { grid-template-columns: 1fr 1fr 1fr; }
-        
         .radio-btn { position: relative; }
         .radio-btn input { position: absolute; opacity: 0; width: 0; height: 0; }
-        .radio-btn span { display: block; text-align: center; padding: 10px 4px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; font-size: 12px; font-weight: 600; color: #64748b; transition: all 0.2s; cursor: pointer; }
-        .radio-btn input:checked + span { background-color: #f0fdfa !important; border-color: #14b8a6 !important; color: #0d9488 !important; box-shadow: inset 0 0 0 1px #14b8a6; }
-        
-        input[type="number"] { width: 100%; background: #ffffff; padding: 8px 12px; border-radius: 8px; border: 1px solid #14b8a6; margin-top: 8px; outline: none; font-size: 13px; font-weight: 600; color: #0d9488; text-align: center; }
+        .radio-btn span {
+            display: block; text-align: center; padding: 10px 6px; background: #f8fafc;
+            border: 1px solid #e2e8f0; border-radius: 10px; font-size: 13px; font-weight: 600;
+            color: #64748b; cursor: pointer;
+        }
+        .radio-btn input:checked + span {
+            background: #ecfdfa; border-color: var(--teal); color: var(--teal-dark);
+            box-shadow: inset 0 0 0 1px var(--teal);
+        }
+
+        .check-row { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 12px; font-size: 16px; }
+        .check-row input { margin-top: 4px; width: 18px; height: 18px; accent-color: var(--teal); }
+
+        select.sale-select {
+            width: 100%; padding: 12px 14px; border-radius: 12px; border: 1px solid #d1d5db;
+            font-size: 16px; background: #fff; color: var(--body);
+        }
+
+        .vas-wrap { margin: 16px 0; }
+        .vas-labels { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-top: 8px; }
+        input[type="range"].vas {
+            width: 100%; accent-color: var(--teal); height: 32px;
+        }
+
+        .instr-section { margin-bottom: 18px; padding-bottom: 14px; border-bottom: 1px solid #f3f4f6; }
+        .instr-section:last-child { border-bottom: none; }
+        .instr-title { font-weight: 700; color: var(--teal); font-size: 15px; margin-bottom: 6px; }
+
+        #calib-stage, #valib-stage {
+            position: relative; flex: 1; min-height: 420px; background: #fafafa; border-radius: 16px;
+            margin: 12px 0; overflow: hidden;
+        }
+        .calib-dot {
+            position: absolute; width: 18px; height: 18px; border-radius: 50%;
+            background: var(--teal); transform: translate(-50%, -50%);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+
+        .examples-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 12px 0;
+        }
+        .examples-grid .ex-cell { border-radius: 12px; overflow: hidden; border: 1px solid #e5e7eb; }
+        .examples-grid .ex-cell img { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; }
+        .ex-cap { font-size: 11px; color: var(--muted); text-align: center; margin-top: 4px; }
+
+        .modal-backdrop {
+            position: absolute; inset: 0; background: rgba(255,255,255,0.96); z-index: 400;
+            display: none; flex-direction: column; padding: 24px; justify-content: center;
+        }
+        .modal-backdrop.active { display: flex; }
+
+        input[type="number"] {
+            width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--teal);
+            font-size: 15px; text-align: center;
+        }
+
+        .break-countdown { font-size: 14px; color: var(--muted); text-align: center; margin: 8px 0; }
     </style>
 </head>
 <body>
 
 <div id="phone-shell">
-    <div id="screen-setup" class="screen active">
-        <div class="mb-6">
-            <h1 class="text-3xl font-black tracking-tight text-teal">SAL-E</h1>
-            <p class="text-zinc-400 text-[9px] uppercase tracking-[0.2em]">Stimulus Configuration</p>
+    <button type="button" id="btn-stop-session" class="hidden" aria-label="Stop session">STOP SESSION</button>
+
+    <!-- Researcher only -->
+    <div id="screen-researcher" class="screen">
+        <div class="mb-4">
+            <h1>SAL-E</h1>
+            <p class="subtle">Researcher configuration</p>
         </div>
-        
         <div class="section-block">
-            <label class="section-title">Ethnicity</label>
+            <label class="section-title">Ethnicity (stimulus pool)</label>
             <div class="segmented-group">
                 <label class="radio-btn"><input type="radio" name="race" value="white" checked><span>White</span></label>
                 <label class="radio-btn"><input type="radio" name="race" value="black"><span>Black</span></label>
             </div>
         </div>
-
         <div class="section-block">
-            <label class="section-title">Presentation Mode</label>
+            <label class="section-title">Preview layout (participant protocol is fixed 1×2)</label>
             <div class="segmented-group">
-                <label class="radio-btn"><input type="radio" name="layout" value="1x2" checked><span>1×2 Portrait</span></label>
-                <label class="radio-btn"><input type="radio" name="layout" value="1x1"><span>1×1 Single</span></label>
+                <label class="radio-btn"><input type="radio" name="layout" value="1x2" checked><span>1×2</span></label>
+                <label class="radio-btn"><input type="radio" name="layout" value="1x1"><span>1×1</span></label>
             </div>
         </div>
-
         <div class="section-block">
-            <label class="section-title">Trial Duration</label>
+            <label class="section-title">Preview durations (ms)</label>
+            <p class="hint" style="margin-bottom:8px">Participant mode uses 1500 ms fixation and 3000 ms stimulus.</p>
             <div class="segmented-group three-cols mb-2">
-                <label class="radio-btn"><input type="radio" name="dur" value="3000"><span>3s</span></label>
+                <label class="radio-btn"><input type="radio" name="dur" value="3000"><span>3s stim</span></label>
                 <label class="radio-btn"><input type="radio" name="dur" value="4000"><span>4s</span></label>
                 <label class="radio-btn"><input type="radio" name="dur" value="5000" checked><span>5s</span></label>
             </div>
-            <label class="radio-btn w-full"><input type="radio" name="dur" value="custom"><span>User Defined</span></label>
-            <input type="number" id="custom-dur-input" placeholder="Enter Milliseconds" style="display:none">
+            <label class="radio-btn w-full block mb-2"><input type="radio" name="dur" value="custom"><span>Custom stimulus</span></label>
+            <input type="number" id="custom-dur-input" placeholder="Stimulus ms" style="display:none">
         </div>
-        
-        <button id="start-btn" onclick="startStudy()" class="btn-teal" disabled>Loading Data...</button>
+        <div class="btn-row">
+            <button type="button" id="researcher-start-participant" class="btn-teal">Begin participant session</button>
+            <button type="button" id="researcher-preview-only" class="btn-outline">Run preview only (skip onboarding)</button>
+        </div>
     </div>
 
-    <div id="screen-fixation" class="screen justify-center items-center">
+    <!-- 1 Welcome -->
+    <div id="screen-welcome" class="screen has-stop">
+        <h1 id="welcome-heading">Welcome to SAL-E</h1>
+        <p id="welcome-session-line" class="body-text font-semibold"></p>
+        <p id="welcome-last-line" class="hint" style="display:none"></p>
+        <div class="vas-wrap">
+            <p class="body-text" style="margin-bottom:6px">Right now, how anxious do you feel?</p>
+            <input type="range" id="pre-anxiety" class="vas" min="0" max="100" value="50">
+            <div class="vas-labels"><span>Not at all anxious</span><span>Extremely anxious</span></div>
+        </div>
+        <p class="hint">Today's session will take about 10 minutes. You can stop at any time using the STOP button at the top of the screen.</p>
+        <div class="btn-row">
+            <button type="button" id="welcome-continue" class="btn-teal">Continue</button>
+        </div>
+    </div>
+
+    <!-- 2 Environment -->
+    <div id="screen-environment" class="screen has-stop">
+        <h1>Before we begin</h1>
+        <p class="body-text">For best results, please confirm:</p>
+        <label class="check-row"><input type="checkbox" id="env-quiet"><span>I'm in a quiet space</span></label>
+        <label class="check-row"><input type="checkbox" id="env-time"><span>I won't be interrupted for 10 minutes</span></label>
+        <label class="check-row"><input type="checkbox" id="env-charge"><span>My phone is charged or plugged in</span></label>
+        <label class="check-row"><input type="checkbox" id="env-hold"><span>I'm holding my phone naturally at reading distance</span></label>
+        <label class="section-title" style="margin-top:16px">Location type</label>
+        <select id="env-location" class="sale-select">
+            <option value="home">Home</option>
+            <option value="work">Work</option>
+            <option value="public">Public</option>
+            <option value="other">Other</option>
+        </select>
+        <label class="section-title" style="margin-top:16px">Current mood</label>
+        <div class="segmented-group" style="grid-template-columns:1fr;">
+            <label class="radio-btn"><input type="radio" name="mood" value="1"><span>Very negative</span></label>
+            <label class="radio-btn"><input type="radio" name="mood" value="2"><span>Negative</span></label>
+            <label class="radio-btn"><input type="radio" name="mood" value="3" checked><span>Neutral</span></label>
+            <label class="radio-btn"><input type="radio" name="mood" value="4"><span>Positive</span></label>
+            <label class="radio-btn"><input type="radio" name="mood" value="5"><span>Very positive</span></label>
+        </div>
+        <div class="btn-row">
+            <button type="button" id="env-continue" class="btn-teal" disabled>Continue</button>
+        </div>
+    </div>
+
+    <!-- 3 Pre-exposure -->
+    <div id="screen-preexposure" class="screen has-stop">
+        <h1>Want to see what kind of faces you'll be looking at?</h1>
+        <p class="body-text">You'll see photographs of people showing different expressions, including happy, sad, angry, and neutral. If you'd like to see some examples first, you can. This is optional.</p>
+        <div class="btn-row">
+            <button type="button" id="preexp-show" class="btn-outline">Show me some examples</button>
+            <button type="button" id="preexp-skip" class="btn-teal">I'm ready to continue</button>
+        </div>
+    </div>
+
+    <div id="screen-preexposure-examples" class="screen has-stop">
+        <h1>Examples</h1>
+        <div id="preexp-examples-grid" class="examples-grid"></div>
+        <p class="hint">These are typical examples. The actual session will show different faces.</p>
+        <div class="btn-row">
+            <button type="button" id="preexp-done" class="btn-teal">I'm ready to continue</button>
+        </div>
+    </div>
+
+    <!-- 4 Instructions -->
+    <div id="screen-instructions" class="screen has-stop">
+        <h1>How the session works</h1>
+        <div class="instr-section">
+            <div class="instr-title">What you'll see</div>
+            <p class="body-text" style="margin:0">You'll see two faces on screen at a time. The faces show different emotions including happy, sad, angry, and neutral expressions. Each pair will be shown for a few seconds.</p>
+        </div>
+        <div class="instr-section">
+            <div class="instr-title">What to do</div>
+            <p class="body-text" style="margin:0">Please look at the screen naturally. There is no correct way to look at the faces. You don't need to identify the emotions, react to them, or do anything specific. Just look at the screen as you normally would when looking at people. Blinking is completely fine.</p>
+        </div>
+        <div class="instr-section">
+            <div class="instr-title">What to know</div>
+            <p class="body-text" style="margin:0">Try to keep the phone at a comfortable reading distance. Hold it steady. The session has 3 short blocks with breaks between them. You can stop at any time by tapping the STOP button at the top of the screen.</p>
+        </div>
+        <div class="btn-row">
+            <button type="button" id="instructions-continue" class="btn-teal">Continue to calibration</button>
+        </div>
+    </div>
+
+    <!-- 5 Calibration intro -->
+    <div id="screen-calib-intro" class="screen has-stop">
+        <h1>Quick calibration</h1>
+        <p class="body-text">We need to calibrate the camera to your eyes. Please look at the dot wherever it appears on the screen and follow it with your gaze. This takes about 30 seconds.</p>
+        <p class="hint">On this web prototype, camera depth and ARKit capture are simulated; a native build will record TrueDepth distance, gaze, and eye transforms per point.</p>
+        <div class="btn-row">
+            <button type="button" id="calib-start" class="btn-teal">Start calibration</button>
+        </div>
+    </div>
+
+    <div id="screen-calib-run" class="screen has-stop" style="padding:12px 16px 16px;">
+        <h2 style="margin-top:8px">Calibration</h2>
+        <p class="hint" style="margin-bottom:8px">Follow the dot.</p>
+        <div id="calib-stage"></div>
+    </div>
+
+    <!-- 6 Validation -->
+    <div id="screen-val-intro" class="screen has-stop">
+        <h1>Calibration check</h1>
+        <p class="body-text">Quick check to make sure the calibration worked. Please follow the dots once more.</p>
+        <div class="btn-row">
+            <button type="button" id="val-start" class="btn-teal">Start check</button>
+        </div>
+    </div>
+
+    <div id="screen-val-run" class="screen has-stop" style="padding:12px 16px 16px;">
+        <h2 style="margin-top:8px">Calibration check</h2>
+        <div id="valib-stage"></div>
+    </div>
+
+    <div id="screen-val-result" class="screen has-stop">
+        <h1 id="val-result-title">All set</h1>
+        <p id="val-result-body" class="body-text">You're ready to begin.</p>
+        <div id="val-pass-actions" class="btn-row">
+            <button type="button" id="val-continue-practice" class="btn-teal">Continue to practice trial</button>
+        </div>
+        <div id="val-fail-actions" class="btn-row" style="display:none">
+            <button type="button" id="val-retry" class="btn-teal">Try again</button>
+            <button type="button" id="val-continue-anyway" class="btn-outline">Continue anyway</button>
+        </div>
+    </div>
+
+    <!-- 7 Practice -->
+    <div id="screen-practice-intro" class="screen has-stop">
+        <h1>Practice trial</h1>
+        <p class="body-text">Here's a quick practice trial so you know what to expect. This one isn't recorded.</p>
+        <div class="btn-row">
+            <button type="button" id="practice-start" class="btn-teal">Start practice</button>
+        </div>
+    </div>
+
+    <div id="screen-practice-done" class="screen has-stop">
+        <h1>Practice complete</h1>
+        <p class="body-text">That's it. The real session will work the same way. Ready to begin?</p>
+        <div class="btn-row">
+            <button type="button" id="practice-to-blocks" class="btn-teal">Start session</button>
+        </div>
+    </div>
+
+    <!-- Fixation / Trial (shared) -->
+    <div id="screen-fixation" class="screen has-stop justify-center items-center" style="align-items:center; justify-content:center;">
         <div class="fixation-cross">+</div>
-        <div class="footer-exit" onclick="location.reload()">Exit Trial</div>
     </div>
-    
-    <div id="screen-trial" class="screen">
-        <div id="progress" class="text-center text-[10px] text-zinc-400 font-bold mb-4 tracking-widest uppercase">Trial</div>
-        <div id="face-grid-container" class="flex-grow flex flex-col justify-center"></div>
-        <div class="footer-exit" onclick="location.reload()">Exit Trial</div>
+
+    <div id="screen-trial" class="screen has-stop">
+        <div id="trial-progress" class="trial-progress">Trial</div>
+        <div id="face-grid-container" class="flex-grow flex flex-col justify-center" style="flex:1; min-height:0; display:flex; flex-direction:column;"></div>
     </div>
-    
-    <div id="screen-done" class="screen justify-center items-center text-center">
-        <h2 class="text-2xl font-bold mb-6 text-teal">Block Complete</h2>
-        <button onclick="location.reload()" class="btn-teal px-10 py-4 rounded-full">New Session</button>
+
+    <!-- Inter-block -->
+    <div id="screen-interblock" class="screen has-stop">
+        <h1>Nice work. Take a quick break.</h1>
+        <p class="body-text">How are you feeling right now? (optional)</p>
+        <div class="segmented-group" style="grid-template-columns:1fr;">
+            <label class="radio-btn"><input type="radio" name="break-mood" value=""><span>Prefer not to say</span></label>
+            <label class="radio-btn"><input type="radio" name="break-mood" value="1"><span>Very low</span></label>
+            <label class="radio-btn"><input type="radio" name="break-mood" value="2"><span>Low</span></label>
+            <label class="radio-btn"><input type="radio" name="break-mood" value="3" checked><span>OK</span></label>
+            <label class="radio-btn"><input type="radio" name="break-mood" value="4"><span>Good</span></label>
+            <label class="radio-btn"><input type="radio" name="break-mood" value="5"><span>Very good</span></label>
+        </div>
+        <p id="interblock-countdown" class="break-countdown"></p>
+        <div class="btn-row">
+            <button type="button" id="interblock-continue" class="btn-teal">Continue to next block</button>
+            <button type="button" id="interblock-end" class="btn-outline">End session here</button>
+        </div>
+    </div>
+
+    <!-- Completion -->
+    <div id="screen-completion" class="screen">
+        <h1 id="completion-heading">Session complete</h1>
+        <p id="completion-body" class="body-text"></p>
+        <div id="completion-anxiety-wrap" class="vas-wrap">
+            <p class="body-text" style="margin-bottom:6px">Right now, how anxious do you feel?</p>
+            <input type="range" id="post-anxiety" class="vas" min="0" max="100" value="50">
+            <div class="vas-labels"><span>Not at all anxious</span><span>Extremely anxious</span></div>
+        </div>
+        <div id="completion-anxiety-followup" style="display:none">
+            <p class="body-text">We notice your anxiety level has gone up since the start of this session. If you'd like to talk to the research team or access support, please tap below.</p>
+            <button type="button" id="completion-contact" class="btn-teal">Talk to research team</button>
+            <button type="button" id="completion-support" class="btn-outline">View support resources</button>
+        </div>
+        <p id="completion-reminder" class="hint" style="margin-top:12px"></p>
+        <p class="body-text" style="font-size:15px"><a id="nhs-link" href="https://www.nhs.uk/mental-health/" target="_blank" rel="noopener noreferrer" style="color:var(--teal); font-weight:600">If you need support at any time, you can find NHS resources here.</a></p>
+        <div class="btn-row">
+            <button type="button" id="completion-done" class="btn-teal">Done</button>
+        </div>
+    </div>
+
+    <!-- STOP confirm -->
+    <div id="screen-stop" class="screen has-stop">
+        <h1>Are you sure you want to stop?</h1>
+        <p class="body-text">Stopping the session is fine. You won't lose any progress for completed trials. You can return to the next session at any time.</p>
+        <div class="btn-row">
+            <button type="button" id="stop-continue" class="btn-teal">Continue session</button>
+            <button type="button" id="stop-confirm" class="btn-outline">Stop session</button>
+            <button type="button" id="stop-support" class="btn-danger-text">I need support</button>
+        </div>
+    </div>
+
+    <!-- Support -->
+    <div id="screen-support" class="screen has-stop">
+        <h1>Support resources</h1>
+        <p class="body-text"><strong>NHS urgent mental health help:</strong> Call <a href="tel:111" style="color:var(--teal)">111</a> or visit <a href="https://www.nhs.uk/nhs-services/mental-health-services/get-urgent-help-for-mental-health/" target="_blank" rel="noopener noreferrer" style="color:var(--teal)">NHS urgent mental health support</a>.</p>
+        <p class="body-text"><strong>NHS mental health information:</strong> <a href="https://www.nhs.uk/mental-health/" target="_blank" rel="noopener noreferrer" style="color:var(--teal)">nhs.uk/mental-health</a></p>
+        <p class="body-text"><strong>Samaritans:</strong> 116 123 (free, 24/7)</p>
+        <div class="btn-row">
+            <button type="button" id="support-back" class="btn-teal">Back</button>
+        </div>
+    </div>
+
+    <!-- Researcher quick preview done -->
+    <div id="screen-preview-done" class="screen justify-center items-center text-center" style="text-align:center; justify-content:center;">
+        <h2 style="color:var(--teal)">Preview complete</h2>
+        <p class="hint">Researcher preview only.</p>
+        <button type="button" id="preview-reload" class="btn-teal" style="max-width:280px; margin:20px auto 0;">Close</button>
+    </div>
+
+    <!-- Contact modal -->
+    <div id="modal-contact" class="modal-backdrop" role="dialog" aria-modal="true">
+        <h2 style="color:var(--teal)">Research team</h2>
+        <p class="body-text">Please contact your study coordinator using the details in your invitation email or participant information sheet.</p>
+        <button type="button" id="modal-contact-close" class="btn-teal">OK</button>
     </div>
 </div>
 
 <script>
+(function () {
+    const IS_RESEARCHER = new URLSearchParams(location.search).get('mode') === 'researcher';
+    const LS_KEY = 'sale_e_participant_v1';
+    const ACTIVE_EMOTIONS = ['FC', 'HO', 'AO'];
+    const TOTAL_PLAN_SESSIONS = 5;
+    const BLOCKS = 3;
+    const TRIALS_PER_BLOCK = 16;
+    const PARTICIPANT_FIXATION_MS = 1500;
+    const PARTICIPANT_STIM_MS = 3000;
+    const INTER_BLOCK_AUTO_MS = 60000;
+    const CALIB_DOT_MS = 1500;
+    const CALIB_PASS_RMSE_CM = 0.75;
+
     let manifest = null;
-    let trialQueue = [];
-    let currentTrialIdx = 0;
-    let results = [];
-    let trialStartTime;
-    let autoTimer;
+    let sessionNum = 1;
+    let record = {};
+    let currentSession = {};
+    let resumeFromStop = { screenId: null };
+    let autoTimer = null;
+    let interBlockTimer = null;
+    let interBlockDeadline = 0;
+    let previewMode = false;
+    let practiceMode = false;
+    let globalTrialIndex = 0;
+    let blockQueues = [];
+    let currentBlockIndex = 0;
+    let trialInBlock = 0;
+    let trialLog = [];
+    let calibrationWarning = false;
+    let sessionSeed = 1;
+    let driftBaselineRmse = 0.45;
+    let sessionStoppedEarly = false;
+    let supportReturnScreen = 'screen-stop';
 
-    document.querySelectorAll('input[name="dur"]').forEach(radio => {
-        radio.addEventListener('change', (e) => {
-            document.getElementById('custom-dur-input').style.display = (e.target.value === 'custom') ? 'block' : 'none';
-        });
-    });
-
-    async function init() {
-        try {
-            const resp = await fetch(`manifest.json?v=${Date.now()}`);
-            manifest = await resp.json();
-            const btn = document.getElementById('start-btn');
-            btn.disabled = false;
-            btn.innerText = "Start Session";
-        } catch (e) { console.error("Manifest error:", e); }
+    function loadRecord() {
+        try { record = JSON.parse(localStorage.getItem(LS_KEY) || '{}'); } catch (e) { record = {}; }
+        if (!record.sessions) record.sessions = {};
+        if (typeof record.completedSessions !== 'number') record.completedSessions = 0;
     }
 
-    function shuffle(array) {
-        for (let i = array.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [array[i], array[j]] = [array[j], array[i]];
+    function saveRecord() {
+        localStorage.setItem(LS_KEY, JSON.stringify(record));
+    }
+
+    function mulberry32(a) {
+        return function () {
+            let t = a += 0x6D2B79F5;
+            t = Math.imul(t ^ t >>> 15, t | 1);
+            t ^= t + Math.imul(t ^ t >>> 7, t | 61);
+            return ((t ^ t >>> 14) >>> 0) / 4294967296;
+        };
+    }
+
+    function shuffleRNG(array, rng) {
+        const arr = array.slice();
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(rng() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
         }
-        return array;
+        return arr;
     }
 
     function showScreen(id) {
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
+        document.querySelectorAll('#phone-shell > .screen').forEach(s => s.classList.remove('active'));
+        const el = document.getElementById(id);
+        if (el) el.classList.add('active');
+        updateStopVisibility(id);
     }
 
-    /** Active emotions (same identity as NC): happy/sad/angry → FC, HO, AO in this stimulus set */
-    const ACTIVE_EMOTIONS = ['FC', 'HO', 'AO'];
-
-    function pickRandomActive() {
-        return ACTIVE_EMOTIONS[Math.floor(Math.random() * ACTIVE_EMOTIONS.length)];
-    }
-
-    function startStudy() {
-        if (!manifest) return;
-        const race = document.querySelector('input[name="race"]:checked').value;
-        const layout = document.querySelector('input[name="layout"]:checked').value;
-        
-        let folders = (race === 'white') ? 
-            [...manifest.WF.map(id => `WF/${id}`), ...manifest.WM.map(id => `WM/${id}`)] : 
-            [...manifest.BF.map(id => `BF/${id}`), ...manifest.BM.map(id => `BM/${id}`)];
-
-        trialQueue = [];
-        if (layout === '1x2') {
-            folders.forEach(path => {
-                const active = pickRandomActive();
-                trialQueue.push({ path, emotions: shuffle(['NC', active]), layout: 'grid-1x2' });
-            });
-            shuffle(trialQueue);
-        } else if (layout === '1x1') {
-            folders.forEach(path => {
-                const pool = ['NC', ...ACTIVE_EMOTIONS];
-                const e = pool[Math.floor(Math.random() * pool.length)];
-                trialQueue.push({ path, emotions: [e], layout: 'grid-single' });
-            });
-            shuffle(trialQueue);
-        }
-        currentTrialIdx = 0;
-        results = [];
-        runTrialCycle();
-    }
-
-    function runTrialCycle() {
-        if (currentTrialIdx >= trialQueue.length) {
-            console.table(results);
-            showScreen('screen-done');
+    function updateStopVisibility(activeId) {
+        const btn = document.getElementById('btn-stop-session');
+        const hideOn = new Set([
+            'screen-welcome', 'screen-completion', 'screen-researcher',
+            'screen-stop', 'screen-support', 'screen-preview-done', 'modal-contact'
+        ]);
+        if (hideOn.has(activeId) || previewMode) {
+            btn.classList.add('hidden');
             return;
         }
-        document.getElementById('progress').innerText = `TRIAL ${currentTrialIdx + 1} / ${trialQueue.length}`;
-        showScreen('screen-fixation');
-        
-        setTimeout(() => {
-            renderTrial();
-            showScreen('screen-trial');
-            trialStartTime = performance.now();
-            let dur = document.querySelector('input[name="dur"]:checked').value;
-            if (dur === 'custom') {
-                const customVal = parseInt(document.getElementById('custom-dur-input').value);
-                dur = !isNaN(customVal) && customVal > 0 ? customVal : 5000;
-            }
-            autoTimer = setTimeout(() => { logTrial('timeout'); runTrialCycle(); }, parseInt(dur));
-        }, 1500);
+        btn.classList.remove('hidden');
     }
 
-    function renderTrial() {
+    function getFoldersForRace(race) {
+        if (!manifest) return [];
+        return race === 'white'
+            ? [...manifest.WF.map(id => `WF/${id}`), ...manifest.WM.map(id => `WM/${id}`)]
+            : [...manifest.BF.map(id => `BF/${id}`), ...manifest.BM.map(id => `BM/${id}`)];
+    }
+
+    function buildBlockTrials(identities, blockIdx) {
+        const rng = mulberry32((sessionSeed + blockIdx * 9973) | 0);
+        const acts = [...Array(5).fill('FC'), ...Array(5).fill('HO'), ...Array(6).fill('AO')];
+        const shuffledActs = shuffleRNG(acts, rng);
+        const posFlags = shuffleRNG([...Array(8).fill(true), ...Array(8).fill(false)], rng);
+        const ids = shuffleRNG(identities, rng).slice(0, TRIALS_PER_BLOCK);
+        while (ids.length < TRIALS_PER_BLOCK) ids.push(identities[ids.length % identities.length]);
+        const trials = [];
+        for (let i = 0; i < TRIALS_PER_BLOCK; i++) {
+            const path = ids[i % ids.length];
+            const active = shuffledActs[i];
+            const activeOnTop = posFlags[i];
+            const emotions = activeOnTop ? [active, 'NC'] : ['NC', active];
+            trials.push({ path, emotions, active, activeOnTop, layout: 'grid-1x2' });
+        }
+        return trials;
+    }
+
+    function buildAllBlocks(race) {
+        const folders = getFoldersForRace(race);
+        if (!folders.length) return [[], [], []];
+        const rng = mulberry32(sessionSeed | 0);
+        const identities = shuffleRNG(folders, rng);
+        return [0, 1, 2].map(b => buildBlockTrials(identities, b));
+    }
+
+    function formatDaysAgo(iso) {
+        if (!iso) return '';
+        const then = new Date(iso).getTime();
+        const days = Math.floor((Date.now() - then) / (86400000));
+        if (days <= 0) return 'today';
+        if (days === 1) return '1 day ago';
+        return days + ' days ago';
+    }
+
+    function nextReminderDate() {
+        const d = new Date(Date.now() + 48 * 3600000);
+        return d.toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    }
+
+    function scheduleReminder() {
+        record.nextReminderAt = new Date(Date.now() + 48 * 3600000).toISOString();
+        saveRecord();
+    }
+
+    function openStop() {
+        const active = document.querySelector('#phone-shell > .screen.active');
+        resumeFromStop.screenId = active ? active.id : 'screen-welcome';
+        showScreen('screen-stop');
+    }
+
+    function appendDataQueue(entry) {
+        const q = record.dataQueue || (record.dataQueue = []);
+        q.push({ ...entry, t: new Date().toISOString() });
+        if (q.length > 2000) q.splice(0, q.length - 2000);
+        saveRecord();
+    }
+
+    function clearTimers() {
+        if (autoTimer) { clearTimeout(autoTimer); autoTimer = null; }
+        if (interBlockTimer) { clearInterval(interBlockTimer); interBlockTimer = null; }
+    }
+
+    function researcherStimulusMs() {
+        let dur = document.querySelector('#screen-researcher input[name="dur"]:checked').value;
+        if (dur === 'custom') {
+            const v = parseInt(document.getElementById('custom-dur-input').value, 10);
+            dur = !isNaN(v) && v > 0 ? String(v) : '5000';
+        }
+        return parseInt(dur, 10);
+    }
+
+    function researcherFixationMs() {
+        return 1500;
+    }
+
+    function syncEnvContinue() {
+        const ok = ['env-quiet', 'env-time', 'env-charge', 'env-hold'].every(id => document.getElementById(id).checked);
+        document.getElementById('env-continue').disabled = !ok;
+    }
+
+    function initWelcomeUI() {
+        loadRecord();
+        const completed = record.completedSessions || 0;
+        sessionNum = Math.min(TOTAL_PLAN_SESSIONS, completed + 1);
+        const first = completed === 0;
+        document.getElementById('welcome-heading').textContent = first ? 'Welcome to SAL-E' : 'Welcome back';
+        document.getElementById('welcome-session-line').textContent = `Session ${sessionNum} of ${TOTAL_PLAN_SESSIONS}`;
+        const lastLine = document.getElementById('welcome-last-line');
+        if (!first && record.lastSessionCompletedAt) {
+            lastLine.style.display = 'block';
+            lastLine.textContent = 'Last session: ' + formatDaysAgo(record.lastSessionCompletedAt);
+        } else {
+            lastLine.style.display = 'none';
+        }
+        document.getElementById('pre-anxiety').value = '50';
+    }
+
+    function persistPreAnxiety() {
+        const v = parseInt(document.getElementById('pre-anxiety').value, 10);
+        currentSession[`session_${sessionNum}_pre_state_anxiety`] = v;
+        appendDataQueue({ type: 'pre_state_anxiety', sessionNum, value: v });
+    }
+
+    function persistEnvironment() {
+        currentSession[`session_${sessionNum}_environment_check`] = {
+            quiet: document.getElementById('env-quiet').checked,
+            uninterrupted: document.getElementById('env-time').checked,
+            charged: document.getElementById('env-charge').checked,
+            readingDistance: document.getElementById('env-hold').checked
+        };
+        currentSession[`session_${sessionNum}_location`] = document.getElementById('env-location').value;
+        currentSession[`session_${sessionNum}_mood`] = document.querySelector('input[name="mood"]:checked').value;
+        appendDataQueue({ type: 'environment', sessionNum, payload: { ...currentSession } });
+    }
+
+    function renderExampleGrid() {
+        const race = localStorage.getItem('sale_stimulus_race') || 'white';
+        const folders = getFoldersForRace(race);
+        const base = folders[0] || 'WF/WF01';
+        const grid = document.getElementById('preexp-examples-grid');
+        grid.innerHTML = '';
+        const specs = [
+            { emo: 'NC', label: 'Neutral' },
+            { emo: 'FC', label: 'Happy' },
+            { emo: 'HO', label: 'Sad' },
+            { emo: 'AO', label: 'Angry' }
+        ];
+        specs.forEach(s => {
+            const wrap = document.createElement('div');
+            wrap.innerHTML = `<div class="ex-cell"><img src="${base}/${s.emo}.jpg" alt=""></div><div class="ex-cap">${s.label}</div>`;
+            grid.appendChild(wrap);
+        });
+    }
+
+    function calibrationPointsMultiDistance() {
+        const base = [
+            { x: 0.5, y: 0.5 },
+            { x: 0.18, y: 0.22 },
+            { x: 0.82, y: 0.22 },
+            { x: 0.18, y: 0.78 },
+            { x: 0.82, y: 0.78 }
+        ];
+        const scales = [0.85, 1, 1.12];
+        const out = [];
+        scales.forEach(sc => {
+            base.forEach(p => {
+                const cx = 0.5 + (p.x - 0.5) * sc;
+                const cy = 0.5 + (p.y - 0.5) * sc;
+                out.push({ x: cx, y: cy, distanceBand: sc });
+            });
+        });
+        return out;
+    }
+
+    function runDotSequence(stageEl, points, msPerPoint, onEach, done) {
+        let i = 0;
+        function step() {
+            stageEl.innerHTML = '';
+            if (i >= points.length) {
+                done();
+                return;
+            }
+            const p = points[i];
+            const dot = document.createElement('div');
+            dot.className = 'calib-dot';
+            dot.style.left = (p.x * 100) + '%';
+            dot.style.top = (p.y * 100) + '%';
+            stageEl.appendChild(dot);
+            if (onEach) onEach(i, p);
+            i++;
+            setTimeout(step, msPerPoint);
+        }
+        step();
+    }
+
+    function fakeCalibrationModel(points) {
+        return {
+            version: 'calibration_model_v1',
+            n: points.length,
+            simulated: true,
+            perEyeUncertainty: { left: 0.12, right: 0.11 },
+            fittedAt: new Date().toISOString()
+        };
+    }
+
+    function startCalibrationRun() {
+        showScreen('screen-calib-run');
+        const stage = document.getElementById('calib-stage');
+        const pts = calibrationPointsMultiDistance();
+        const samples = [];
+        runDotSequence(stage, pts, CALIB_DOT_MS, (i, p) => {
+            samples.push({
+                i,
+                x: p.x,
+                y: p.y,
+                distanceBand: p.distanceBand,
+                lookAtPoint: { x: p.x, y: p.y },
+                leftEyeTransform: null,
+                rightEyeTransform: null,
+                headPose: null,
+                trueDepthM: 0.45 + (1 - p.distanceBand) * 0.05,
+                t: performance.now()
+            });
+        }, () => {
+            const model = fakeCalibrationModel(samples);
+            currentSession[`session_${sessionNum}_calibration_model_v1`] = model;
+            currentSession[`session_${sessionNum}_calibration_samples`] = samples;
+            appendDataQueue({ type: 'calibration_complete', sessionNum, n: samples.length });
+            showScreen('screen-val-intro');
+        });
+    }
+
+    function runValidation() {
+        showScreen('screen-val-run');
+        const stage = document.getElementById('valib-stage');
+        const rng = mulberry32((sessionSeed + 404) | 0);
+        const pool = calibrationPointsMultiDistance();
+        const picks = shuffleRNG(pool, rng).slice(0, 5);
+        const errors = [];
+        runDotSequence(stage, picks, CALIB_DOT_MS, () => {}, () => {
+            picks.forEach(() => errors.push(0.3 + Math.random() * 0.35));
+            const medianErr = errors.slice().sort((a, b) => a - b)[Math.floor(errors.length / 2)];
+            const passed = medianErr <= CALIB_PASS_RMSE_CM;
+            currentSession[`session_${sessionNum}_calibration_rmse`] = medianErr;
+            currentSession[`session_${sessionNum}_calibration_passed`] = passed;
+            driftBaselineRmse = medianErr;
+            appendDataQueue({ type: 'calibration_validation', sessionNum, medianRmseCm: medianErr, passed });
+            const title = document.getElementById('val-result-title');
+            const body = document.getElementById('val-result-body');
+            const passA = document.getElementById('val-pass-actions');
+            const failA = document.getElementById('val-fail-actions');
+            if (passed) {
+                title.textContent = 'All set';
+                body.textContent = "You're ready to begin.";
+                passA.style.display = 'flex';
+                failA.style.display = 'none';
+                calibrationWarning = false;
+            } else {
+                title.textContent = 'Calibration';
+                body.textContent = "Let's try the calibration again. Please make sure your face is well-lit and you're holding the phone steady.";
+                passA.style.display = 'none';
+                failA.style.display = 'flex';
+            }
+            showScreen('screen-val-result');
+        });
+    }
+
+    function logFixationSample(kind) {
+        if (previewMode || practiceMode) return;
+        appendDataQueue({
+            type: 'fixation_sample',
+            sessionNum,
+            kind,
+            globalTrialIndex,
+            block: currentBlockIndex,
+            trialInBlock
+        });
+    }
+
+    function runFixationThenTrial() {
+        clearTimers();
+        showScreen('screen-fixation');
+        logFixationSample('inter_trial');
+        const fixMs = previewMode ? researcherFixationMs() : PARTICIPANT_FIXATION_MS;
+        autoTimer = setTimeout(() => {
+            renderCurrentTrial();
+            showScreen('screen-trial');
+            const stimMs = previewMode ? researcherStimulusMs() : PARTICIPANT_STIM_MS;
+            const t0 = performance.now();
+            if (!practiceMode && !previewMode) logTrialStart(t0);
+            autoTimer = setTimeout(() => endTrialTick(stimMs), stimMs);
+        }, fixMs);
+    }
+
+    function renderCurrentTrial() {
         const container = document.getElementById('face-grid-container');
-        const trial = trialQueue[currentTrialIdx];
-        container.innerHTML = `<div id="face-grid" class="${trial.layout}"></div>`;
+        const trial = blockQueues[currentBlockIndex][trialInBlock];
+        const total = BLOCKS * TRIALS_PER_BLOCK;
+        document.getElementById('trial-progress').textContent =
+            previewMode ? `Preview · Trial ${globalTrialIndex + 1}` : `Trial ${globalTrialIndex + 1} of ${total}`;
+        const layoutClass = trial.layout === 'grid-single' ? 'grid-single' : 'grid-1x2';
+        container.innerHTML = `<div id="face-grid" class="${layoutClass}"></div>`;
         const grid = document.getElementById('face-grid');
-        
         trial.emotions.forEach(emo => {
             const cell = document.createElement('div');
-            cell.className = "face-cell w-full aspect-square";
-            cell.innerHTML = `<img src="${trial.path}/${emo}.jpg" onerror="this.style.opacity='0'">`;
-            cell.onclick = () => { clearTimeout(autoTimer); logTrial(emo); runTrialCycle(); };
+            cell.className = 'face-cell w-full';
+            cell.innerHTML = `<img src="${trial.path}/${emo}.jpg" alt="">`;
             grid.appendChild(cell);
         });
     }
 
-    function logTrial(choice) {
-        const t = trialQueue[currentTrialIdx];
-        results.push({ trial: currentTrialIdx+1, id: t.path, stimuli: t.emotions.join(','), choice, rt: (performance.now() - trialStartTime).toFixed(0) });
-        currentTrialIdx++;
+    function logTrialStart(t0) {
+        appendDataQueue({
+            type: 'trial_start',
+            sessionNum,
+            globalTrialIndex,
+            block: currentBlockIndex,
+            trialInBlock,
+            path: blockQueues[currentBlockIndex][trialInBlock].path,
+            emotions: blockQueues[currentBlockIndex][trialInBlock].emotions,
+            active: blockQueues[currentBlockIndex][trialInBlock].active,
+            activeOnTop: blockQueues[currentBlockIndex][trialInBlock].activeOnTop,
+            t0
+        });
     }
-    init();
+
+    function logTrialEnd() {
+        const trial = blockQueues[currentBlockIndex][trialInBlock];
+        const entry = {
+            type: 'trial_end',
+            sessionNum,
+            globalTrialIndex,
+            block: currentBlockIndex,
+            trialInBlock,
+            path: trial.path,
+            stimuli: trial.emotions.join(','),
+            active: trial.active,
+            activeOnTop: trial.activeOnTop
+        };
+        trialLog.push(entry);
+        appendDataQueue(entry);
+        if (!practiceMode && !previewMode && (globalTrialIndex + 1) % 8 === 0) {
+            appendDataQueue({
+                type: 'drift_check_placeholder',
+                sessionNum,
+                baselineRmse: driftBaselineRmse,
+                note: 'Native app: compare fixation error to 1.2× baseline; trigger 5-point recalibration if exceeded.'
+            });
+        }
+    }
+
+    function endTrialTick(stimMs) {
+        if (!practiceMode && !previewMode) logTrialEnd();
+        globalTrialIndex++;
+        trialInBlock++;
+        if (practiceMode) {
+            practiceMode = false;
+            showScreen('screen-practice-done');
+            return;
+        }
+        if (trialInBlock >= TRIALS_PER_BLOCK) {
+            trialInBlock = 0;
+            if (currentBlockIndex < BLOCKS - 1) {
+                startInterBlock();
+                return;
+            }
+            finishSessionNormal();
+            return;
+        }
+        runFixationThenTrial();
+    }
+
+    function startInterBlock() {
+        showScreen('screen-interblock');
+        interBlockDeadline = Date.now() + INTER_BLOCK_AUTO_MS;
+        const cd = document.getElementById('interblock-countdown');
+        function tick() {
+            const s = Math.max(0, Math.ceil((interBlockDeadline - Date.now()) / 1000));
+            cd.textContent = `Continuing automatically in ${s}s…`;
+        }
+        tick();
+        interBlockTimer = setInterval(() => {
+            tick();
+            if (Date.now() >= interBlockDeadline) {
+                clearInterval(interBlockTimer);
+                interBlockTimer = null;
+                continueNextBlock();
+            }
+        }, 500);
+    }
+
+    function continueNextBlock() {
+        if (interBlockTimer) { clearInterval(interBlockTimer); interBlockTimer = null; }
+        const mood = document.querySelector('input[name="break-mood"]:checked');
+        if (mood && mood.value) {
+            currentSession[`session_${sessionNum}_break_${currentBlockIndex}_feeling`] = mood.value;
+            appendDataQueue({ type: 'inter_block_feeling', sessionNum, afterBlock: currentBlockIndex, value: mood.value });
+        }
+        currentBlockIndex++;
+        trialInBlock = 0;
+        runFixationThenTrial();
+    }
+
+    function finishSessionNormal() {
+        sessionStoppedEarly = false;
+        showCompletion(false);
+    }
+
+    function showCompletion(stoppedEarly) {
+        clearTimers();
+        const doneBtn = document.getElementById('completion-done');
+        doneBtn.textContent = 'Done';
+        delete doneBtn.dataset.step;
+        const pre = currentSession[`session_${sessionNum}_pre_state_anxiety`] ?? 50;
+        document.getElementById('post-anxiety').value = String(pre);
+        document.getElementById('completion-heading').textContent = stoppedEarly ? 'Session ended' : 'Session complete';
+        document.getElementById('completion-body').textContent = stoppedEarly
+            ? 'You stopped this session. Completed trials are saved. You can continue with your next session when you are ready.'
+            : `Thank you. You've finished session ${sessionNum} of ${TOTAL_PLAN_SESSIONS}.`;
+        document.getElementById('completion-anxiety-followup').style.display = 'none';
+        document.getElementById('completion-reminder').textContent =
+            `Your next session is available on ${nextReminderDate()}. We'll send you a reminder.`;
+        showScreen('screen-completion');
+    }
+
+    function finalizeSession(post, pre) {
+        currentSession[`session_${sessionNum}_post_state_anxiety`] = post;
+        currentSession[`session_${sessionNum}_completion_time`] = new Date().toISOString();
+        if (calibrationWarning) currentSession[`session_${sessionNum}_calibration_warning`] = true;
+        record.sessions[String(sessionNum)] = { ...record.sessions[String(sessionNum)], ...currentSession, trialLog };
+        if (!sessionStoppedEarly) {
+            record.completedSessions = Math.max(record.completedSessions, sessionNum);
+        }
+        record.lastSessionCompletedAt = new Date().toISOString();
+        scheduleReminder();
+        appendDataQueue({
+            type: sessionStoppedEarly ? 'session_ended_early' : 'session_complete',
+            sessionNum,
+            post,
+            pre,
+            trialsLogged: trialLog.length
+        });
+        saveRecord();
+    }
+
+    function startPracticeTrial() {
+        const race = localStorage.getItem('sale_stimulus_race') || 'white';
+        const folders = getFoldersForRace(race);
+        const path = folders[0] || 'WF/WF01';
+        practiceMode = true;
+        blockQueues = [[{ path, emotions: ['NC', 'NC'], active: 'NC', activeOnTop: true, layout: 'grid-1x2' }]];
+        currentBlockIndex = 0;
+        trialInBlock = 0;
+        globalTrialIndex = 0;
+        runFixationThenTrial();
+    }
+
+    function startMainBlocks() {
+        sessionStoppedEarly = false;
+        const race = localStorage.getItem('sale_stimulus_race') || 'white';
+        sessionSeed = ((Date.now() % 100000) + (sessionNum * 17)) | 0;
+        blockQueues = buildAllBlocks(race);
+        currentBlockIndex = 0;
+        trialInBlock = 0;
+        globalTrialIndex = 0;
+        trialLog = [];
+        runFixationThenTrial();
+    }
+
+    function startResearcherPreviewQueue() {
+        const race = document.querySelector('#screen-researcher input[name="race"]:checked').value;
+        const layout = document.querySelector('#screen-researcher input[name="layout"]:checked').value;
+        const folders = shuffleRNG(getFoldersForRace(race), mulberry32(Date.now() | 0));
+        previewMode = true;
+        trialLog = [];
+        globalTrialIndex = 0;
+        currentBlockIndex = 0;
+        trialInBlock = 0;
+        if (layout === '1x2') {
+            blockQueues = [folders.slice(0, 6).map(path => {
+                const active = ACTIVE_EMOTIONS[Math.floor(Math.random() * ACTIVE_EMOTIONS.length)];
+                const top = Math.random() < 0.5;
+                return { path, emotions: top ? [active, 'NC'] : ['NC', active], active, activeOnTop: top, layout: 'grid-1x2' };
+            })];
+        } else {
+            blockQueues = [folders.slice(0, 6).map(path => {
+                const pool = ['NC', ...ACTIVE_EMOTIONS];
+                const e = pool[Math.floor(Math.random() * pool.length)];
+                return { path, emotions: [e], layout: 'grid-single' };
+            })];
+        }
+        trialInBlock = 0;
+        runFixationThenTrial();
+    }
+
+    function endPreview() {
+        previewMode = false;
+        clearTimers();
+        showScreen('screen-preview-done');
+    }
+
+    function wireEvents() {
+        document.getElementById('btn-stop-session').addEventListener('click', openStop);
+
+        document.querySelectorAll('#screen-researcher input[name="dur"]').forEach(r => {
+            r.addEventListener('change', e => {
+                document.getElementById('custom-dur-input').style.display =
+                    e.target.value === 'custom' ? 'block' : 'none';
+            });
+        });
+
+        document.getElementById('researcher-start-participant').addEventListener('click', () => {
+            const race = document.querySelector('#screen-researcher input[name="race"]:checked').value;
+            localStorage.setItem('sale_stimulus_race', race);
+            currentSession = {};
+            initWelcomeUI();
+            showScreen('screen-welcome');
+        });
+
+        document.getElementById('researcher-preview-only').addEventListener('click', () => {
+            localStorage.setItem('sale_stimulus_race', document.querySelector('#screen-researcher input[name="race"]:checked').value);
+            startResearcherPreviewQueue();
+        });
+
+        document.getElementById('welcome-continue').addEventListener('click', () => {
+            persistPreAnxiety();
+            showScreen('screen-environment');
+        });
+
+        ['env-quiet', 'env-time', 'env-charge', 'env-hold'].forEach(id => {
+            document.getElementById(id).addEventListener('change', syncEnvContinue);
+        });
+        document.getElementById('env-continue').addEventListener('click', () => {
+            persistEnvironment();
+            showScreen('screen-preexposure');
+        });
+
+        document.getElementById('preexp-show').addEventListener('click', () => {
+            renderExampleGrid();
+            showScreen('screen-preexposure-examples');
+        });
+        document.getElementById('preexp-skip').addEventListener('click', () => {
+            currentSession[`session_${sessionNum}_pre_exposure_viewed`] = false;
+            showScreen('screen-instructions');
+        });
+        document.getElementById('preexp-done').addEventListener('click', () => {
+            currentSession[`session_${sessionNum}_pre_exposure_viewed`] = true;
+            appendDataQueue({ type: 'pre_exposure_viewed', sessionNum, value: true });
+            showScreen('screen-instructions');
+        });
+
+        document.getElementById('instructions-continue').addEventListener('click', () => showScreen('screen-calib-intro'));
+        document.getElementById('calib-start').addEventListener('click', startCalibrationRun);
+        document.getElementById('val-start').addEventListener('click', runValidation);
+        document.getElementById('val-continue-practice').addEventListener('click', () => showScreen('screen-practice-intro'));
+        document.getElementById('val-retry').addEventListener('click', () => showScreen('screen-calib-intro'));
+        document.getElementById('val-continue-anyway').addEventListener('click', () => {
+            calibrationWarning = true;
+            currentSession[`session_${sessionNum}_calibration_warning`] = true;
+            showScreen('screen-practice-intro');
+        });
+
+        document.getElementById('practice-start').addEventListener('click', startPracticeTrial);
+        document.getElementById('practice-to-blocks').addEventListener('click', startMainBlocks);
+
+        document.getElementById('interblock-continue').addEventListener('click', continueNextBlock);
+        document.getElementById('interblock-end').addEventListener('click', () => {
+            if (interBlockTimer) { clearInterval(interBlockTimer); interBlockTimer = null; }
+            resumeFromStop.screenId = 'screen-interblock';
+            showScreen('screen-stop');
+        });
+
+        document.getElementById('stop-continue').addEventListener('click', () => {
+            showScreen(resumeFromStop.screenId || 'screen-welcome');
+        });
+        document.getElementById('stop-confirm').addEventListener('click', () => {
+            clearTimers();
+            previewMode = false;
+            practiceMode = false;
+            sessionStoppedEarly = true;
+            showCompletion(true);
+        });
+        document.getElementById('stop-support').addEventListener('click', () => {
+            supportReturnScreen = 'screen-stop';
+            showScreen('screen-support');
+        });
+        document.getElementById('support-back').addEventListener('click', () => {
+            showScreen(supportReturnScreen || 'screen-stop');
+        });
+
+        document.getElementById('completion-done').addEventListener('click', () => {
+            const post = parseInt(document.getElementById('post-anxiety').value, 10);
+            const pre = currentSession[`session_${sessionNum}_pre_state_anxiety`] ?? 50;
+            const btn = document.getElementById('completion-done');
+            if (!btn.dataset.step) {
+                finalizeSession(post, pre);
+                btn.dataset.step = 'saved';
+                if (post - pre >= 20) {
+                    document.getElementById('completion-anxiety-followup').style.display = 'block';
+                    btn.textContent = 'Finish';
+                    return;
+                }
+            }
+            delete btn.dataset.step;
+            btn.textContent = 'Done';
+            if (IS_RESEARCHER) {
+                showScreen('screen-researcher');
+                return;
+            }
+            location.reload();
+        });
+
+        document.getElementById('completion-contact').addEventListener('click', () => {
+            document.getElementById('modal-contact').classList.add('active');
+        });
+        document.getElementById('completion-support').addEventListener('click', () => {
+            supportReturnScreen = 'screen-completion';
+            showScreen('screen-support');
+        });
+        document.getElementById('modal-contact-close').addEventListener('click', () => {
+            document.getElementById('modal-contact').classList.remove('active');
+        });
+
+        document.getElementById('preview-reload').addEventListener('click', () => {
+            location.reload();
+        });
+    }
+
+    function previewTrialAdvance() {
+        globalTrialIndex++;
+        trialInBlock++;
+        if (trialInBlock >= blockQueues[currentBlockIndex].length) {
+            endPreview();
+            return;
+        }
+        runFixationThenTrial();
+    }
+
+    const origEndTrial = endTrialTick;
+    endTrialTick = function (stimMs) {
+        if (previewMode) {
+            previewTrialAdvance();
+            return;
+        }
+        origEndTrial(stimMs);
+    };
+
+    async function boot() {
+        wireEvents();
+        loadRecord();
+        try {
+            const resp = await fetch(`manifest.json?v=${Date.now()}`);
+            manifest = await resp.json();
+        } catch (e) {
+            console.error(e);
+        }
+
+        if (IS_RESEARCHER) {
+            document.getElementById('researcher-start-participant').disabled = !manifest;
+            document.getElementById('researcher-preview-only').disabled = !manifest;
+            showScreen('screen-researcher');
+        } else {
+            localStorage.setItem('sale_stimulus_race', localStorage.getItem('sale_stimulus_race') || 'white');
+            currentSession = {};
+            initWelcomeUI();
+            showScreen('screen-welcome');
+        }
+        updateStopVisibility(document.querySelector('#phone-shell > .screen.active')?.id || '');
+    }
+
+    boot();
+})();
 </script>
 </body>
 </html>
