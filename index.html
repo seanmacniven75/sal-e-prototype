@@ -57,10 +57,15 @@
         }
         #btn-stop-session.hidden { display: none !important; }
         #btn-stop-session.stop-affordance--prominent {
-            background: #fff5f5; color: #b91c1c; border: 1px solid #fecaca;
-            border-radius: 10px; padding: 10px 12px; min-height: 44px;
-            font-size: 16px; font-weight: 800; letter-spacing: 0.02em;
+            display: inline-flex; align-items: center; justify-content: center;
+            gap: 5px; background: #fff5f5; color: #b91c1c; border: 1px solid #fecaca;
+            border-radius: 8px; padding: 6px 9px; min-height: 36px; min-width: 36px;
+            font-size: 12px; font-weight: 700; letter-spacing: 0.04em;
         }
+        #btn-stop-session.stop-affordance--prominent .stop-exit-svg {
+            display: block; width: 13px; height: 13px; flex-shrink: 0;
+        }
+        #btn-stop-session.stop-affordance--prominent .stop-exit-label { line-height: 1; }
         #btn-stop-session.stop-affordance--subtle {
             background: transparent; color: #9ca3af; border: none;
             border-radius: 10px; padding: 14px 16px; min-height: 44px; min-width: 44px;
@@ -189,7 +194,7 @@
 <body>
 
 <div id="phone-shell">
-    <button type="button" id="btn-stop-session" class="hidden stop-affordance--prominent" aria-label="Stop session">STOP SESSION</button>
+    <button type="button" id="btn-stop-session" class="hidden stop-affordance--prominent" aria-label="Stop session"></button>
     <div id="data-inspector-panel" aria-live="polite"></div>
 
     <!-- Screen 0: Profile (first session only; also "About me" from Welcome) -->
@@ -375,7 +380,7 @@
             <input type="range" id="pre-anxiety" class="vas" min="0" max="100" value="50">
             <div class="vas-labels"><span>Not at all anxious</span><span>Extremely anxious</span></div>
         </div>
-        <p class="hint">Today's session will take about 10 minutes. You can stop at any time using the control at the top of the screen (it appears more quietly during the face blocks).</p>
+        <p class="hint">Today's session will take about 10 minutes. You can leave at any time using Exit at the top of the screen (during face blocks it shows as a quieter "Stop session" link).</p>
         <div class="btn-row">
             <button type="button" id="welcome-continue" class="btn-teal">Continue</button>
         </div>
@@ -635,6 +640,8 @@
 
     const LS_CALIB_CFG = 'sale_researcher_calib_config';
 
+    const EXIT_CONTROL_HTML = '<svg class="stop-exit-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg><span class="stop-exit-label">EXIT</span>';
+
     function loadRecord() {
         try { record = JSON.parse(localStorage.getItem(LS_KEY) || '{}'); } catch (e) { record = {}; }
         if (!record.sessions) record.sessions = {};
@@ -728,7 +735,7 @@
             btn.textContent = 'Stop session';
             btn.setAttribute('aria-label', 'Stop session');
         } else {
-            btn.textContent = 'STOP SESSION';
+            btn.innerHTML = EXIT_CONTROL_HTML;
             btn.setAttribute('aria-label', 'Stop session');
         }
     }
