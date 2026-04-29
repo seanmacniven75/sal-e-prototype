@@ -49,17 +49,61 @@
         }
         .btn-row { display: flex; flex-direction: column; gap: 0; margin-top: auto; padding-top: 16px; }
 
+        /* STOP: prominent (screens 0, 0.5, 1–7, 9) vs subtle during main trial blocks */
         #btn-stop-session {
-            position: absolute; top: 10px; right: 14px; z-index: 300;
-            background: #fff; color: #dc2626; border: none;
-            font-size: 11px; font-weight: 800; letter-spacing: 0.06em;
-            padding: 8px 8px; cursor: pointer; font-family: inherit;
+            position: absolute; top: 8px; right: 10px; z-index: 300;
+            cursor: pointer; font-family: inherit; line-height: 1.2;
+            -webkit-tap-highlight-color: transparent;
         }
         #btn-stop-session.hidden { display: none !important; }
+        #btn-stop-session.stop-affordance--prominent {
+            background: #fff5f5; color: #b91c1c; border: 1px solid #fecaca;
+            border-radius: 10px; padding: 10px 12px; min-height: 44px;
+            font-size: 16px; font-weight: 800; letter-spacing: 0.02em;
+        }
+        #btn-stop-session.stop-affordance--subtle {
+            background: transparent; color: #9ca3af; border: none;
+            border-radius: 10px; padding: 14px 16px; min-height: 44px; min-width: 44px;
+            font-size: 14px; font-weight: 500; letter-spacing: 0.01em;
+        }
+
+        .text-link { color: var(--teal); font-weight: 600; text-decoration: underline; font-size: 16px; }
+        .text-link-row { margin: 10px 0; }
+        input[type="date"].sale-input, textarea.sale-textarea, input.sale-text {
+            width: 100%; padding: 12px 14px; border-radius: 12px; border: 1px solid #d1d5db;
+            font-size: 16px; background: #fff; color: var(--body); box-sizing: border-box;
+        }
+        textarea.sale-textarea { min-height: 72px; resize: vertical; }
+        .profile-note { font-size: 14px; color: var(--muted); margin-top: 6px; }
+
+        #calib-debug-overlay {
+            position: absolute; inset: 0; pointer-events: none; z-index: 50;
+        }
+        .debug-gaze {
+            position: absolute; width: 12px; height: 12px; border-radius: 50%;
+            background: rgba(220, 38, 38, 0.85); transform: translate(-50%, -50%);
+            border: 2px solid #fff; box-shadow: 0 0 0 1px rgba(0,0,0,0.2);
+        }
+        #research-debug-hud {
+            position: absolute; left: 8px; bottom: 8px; right: 8px; z-index: 60;
+            background: rgba(255,255,255,0.94); border: 1px solid #e5e7eb; border-radius: 10px;
+            padding: 8px 10px; font-size: 11px; color: #374151; pointer-events: none;
+            line-height: 1.35;
+        }
+        #data-inspector-panel {
+            position: absolute; left: 6px; right: 6px; bottom: 6px; max-height: 38%;
+            background: #111; color: #e5e7eb; border-radius: 10px; font-size: 10px;
+            font-family: ui-monospace, monospace; overflow: auto; z-index: 250;
+            padding: 8px; display: none;
+        }
+        #data-inspector-panel.active { display: block; }
 
         .grid-1x2 {
             display: grid; grid-template-columns: 1fr; grid-template-rows: 1fr 1fr;
             gap: 12px; flex: 1; min-height: 200px; padding: 8px 0;
+        }
+        .grid-single {
+            display: grid; grid-template-columns: 1fr; place-items: center; flex: 1; min-height: 200px; padding: 8px 0;
         }
         .face-cell {
             background: #f8fafc; border-radius: 12px; overflow: hidden;
@@ -145,7 +189,90 @@
 <body>
 
 <div id="phone-shell">
-    <button type="button" id="btn-stop-session" class="hidden" aria-label="Stop session">STOP SESSION</button>
+    <button type="button" id="btn-stop-session" class="hidden stop-affordance--prominent" aria-label="Stop session">STOP SESSION</button>
+    <div id="data-inspector-panel" aria-live="polite"></div>
+
+    <!-- Screen 0: Profile (first session only; also "About me" from Welcome) -->
+    <div id="screen-profile" class="screen has-stop">
+        <h1 id="profile-screen-title">Let's set up your profile</h1>
+        <p id="profile-screen-intro" class="body-text">We'll ask a few quick questions. This helps us tailor the session to you and analyse the results properly. Your responses are stored securely and pseudonymised.</p>
+        <p id="profile-id-line" class="hint" style="display:none"></p>
+
+        <label class="section-title" style="margin-top:8px">About you</label>
+        <label class="section-title">Date of birth</label>
+        <input type="date" id="profile-dob" class="sale-input" required>
+        <p id="profile-age-line" class="profile-note"></p>
+
+        <label class="section-title">Sex assigned at birth</label>
+        <div class="segmented-group">
+            <label class="radio-btn"><input type="radio" name="profile-sex" value="male"><span>Male</span></label>
+            <label class="radio-btn"><input type="radio" name="profile-sex" value="female"><span>Female</span></label>
+        </div>
+        <label class="radio-btn w-full block mt-2"><input type="radio" name="profile-sex" value="prefer_not" checked><span>Prefer not to say</span></label>
+
+        <label class="section-title" style="margin-top:14px">Gender identity</label>
+        <div class="segmented-group" style="grid-template-columns:1fr;">
+            <label class="radio-btn"><input type="radio" name="profile-gender" value="male"><span>Male</span></label>
+            <label class="radio-btn"><input type="radio" name="profile-gender" value="female"><span>Female</span></label>
+            <label class="radio-btn"><input type="radio" name="profile-gender" value="nonbinary"><span>Non-binary</span></label>
+            <label class="radio-btn"><input type="radio" name="profile-gender" value="other"><span>Other</span></label>
+            <label class="radio-btn"><input type="radio" name="profile-gender" value="prefer_not" checked><span>Prefer not to say</span></label>
+        </div>
+        <div id="profile-gender-other-wrap" style="display:none; margin-top:10px;">
+            <label class="section-title">Please specify</label>
+            <input type="text" id="profile-gender-other" class="sale-text" placeholder="How you describe your gender" autocomplete="off">
+        </div>
+
+        <h2 style="margin-top:20px; font-size:1.05rem">Ethnicity</h2>
+        <p class="hint">We use this to match you with photographs of people from a similar ethnic background, because research shows people respond differently to faces from their own group. If you select "Other," we'll match you randomly.</p>
+        <div class="segmented-group" style="margin-top:10px;">
+            <label class="radio-btn"><input type="radio" name="profile-ethnicity" value="white" checked><span>White</span></label>
+            <label class="radio-btn"><input type="radio" name="profile-ethnicity" value="black"><span>Black</span></label>
+            <label class="radio-btn"><input type="radio" name="profile-ethnicity" value="other"><span>Other</span></label>
+        </div>
+
+        <label class="section-title" style="margin-top:16px">Visual correction</label>
+        <p class="body-text" style="margin-bottom:6px">Do you wear glasses or contact lenses?</p>
+        <div class="segmented-group">
+            <label class="radio-btn"><input type="radio" name="profile-glasses" value="no" checked><span>No</span></label>
+            <label class="radio-btn"><input type="radio" name="profile-glasses" value="yes"><span>Yes</span></label>
+        </div>
+        <p id="profile-glasses-note" class="hint" style="display:none; margin-top:8px">Please wear them as you normally would during sessions.</p>
+
+        <label class="section-title" style="margin-top:16px">Health screening</label>
+        <p class="body-text" style="margin-bottom:6px">Do you have any uncorrected vision problems we should know about?</p>
+        <div class="segmented-group">
+            <label class="radio-btn"><input type="radio" name="profile-vision" value="no" checked><span>No</span></label>
+            <label class="radio-btn"><input type="radio" name="profile-vision" value="yes"><span>Yes</span></label>
+        </div>
+        <div id="profile-vision-wrap" style="display:none; margin-top:10px;">
+            <label class="section-title">Brief details (optional)</label>
+            <textarea id="profile-vision-notes" class="sale-textarea" placeholder="Anything that might affect viewing the screen"></textarea>
+        </div>
+
+        <div class="btn-row">
+            <button type="button" id="profile-continue" class="btn-teal">Continue</button>
+            <button type="button" id="profile-cancel-edit" class="btn-outline" style="display:none">Back to Welcome</button>
+        </div>
+    </div>
+
+    <!-- Screen 0.5: About this research (first session only) -->
+    <div id="screen-about-research" class="screen has-stop">
+        <h1>About this research</h1>
+        <div class="body-text" style="font-size:16px; line-height:1.5; max-height:52vh; overflow-y:auto;">
+            <p>Thank you for participating in SAL-E.</p>
+            <p>This study is part of research at King's College London on how people pay attention to faces. We're interested in understanding how attention works in different people, and how we can measure it using everyday smartphones rather than specialised laboratory equipment.</p>
+            <p>Over the next two weeks you'll complete five short sessions like this one. Each session takes about 10 minutes and involves looking at photographs of faces. You don't need to do anything except look at the screen naturally.</p>
+            <p>The information we collect will help us understand attention patterns in social anxiety and may eventually help develop better assessment tools for mental health support.</p>
+            <p>Your data is encrypted, anonymised, and stored securely. You can withdraw at any time without giving a reason.</p>
+        </div>
+        <div class="text-link-row"><a id="link-study-info" class="text-link" href="https://www.kcl.ac.uk/research" target="_blank" rel="noopener noreferrer">Read full study information</a></div>
+        <div class="text-link-row"><a id="link-consent" class="text-link" href="https://www.kcl.ac.uk/legal/privacy" target="_blank" rel="noopener noreferrer">View consent form</a></div>
+        <p class="hint" style="font-size:12px">Replace these links with your study information sheet and consent archive URLs when available.</p>
+        <div class="btn-row">
+            <button type="button" id="about-research-continue" class="btn-teal">Got it, let's begin</button>
+        </div>
+    </div>
 
     <!-- Researcher only -->
     <div id="screen-researcher" class="screen">
@@ -178,14 +305,68 @@
             <label class="radio-btn w-full block mb-2"><input type="radio" name="dur" value="custom"><span>Custom stimulus</span></label>
             <input type="number" id="custom-dur-input" placeholder="Stimulus ms" style="display:none">
         </div>
+        <div class="section-block">
+            <label class="section-title">Researcher menu</label>
+            <button type="button" id="researcher-open-menu" class="btn-outline">Open researcher tools</button>
+        </div>
         <div class="btn-row">
             <button type="button" id="researcher-start-participant" class="btn-teal">Begin participant session</button>
             <button type="button" id="researcher-preview-only" class="btn-outline">Run preview only (skip onboarding)</button>
         </div>
     </div>
 
+    <div id="screen-researcher-menu" class="screen">
+        <h1>Researcher tools</h1>
+        <p class="hint">These views are only available in researcher mode.</p>
+        <button type="button" id="tool-calib-config" class="btn-teal" style="margin-top:14px">Calibration configuration</button>
+        <button type="button" id="tool-calib-debug" class="btn-outline">Calibration debug</button>
+        <button type="button" id="tool-data-inspector" class="btn-outline">Data stream inspector</button>
+        <div class="btn-row">
+            <button type="button" id="researcher-menu-back" class="btn-outline">Back</button>
+        </div>
+    </div>
+
+    <div id="screen-research-calib-config" class="screen">
+        <h1>Calibration configuration</h1>
+        <p class="hint">Overrides apply to validation and drift logic in this browser build. Defaults match the pre-registered participant protocol.</p>
+        <label class="section-title">Pass threshold (median RMSE, cm)</label>
+        <input type="number" id="cfg-rmse-pass" class="sale-text" step="0.05" min="0.1" value="0.75">
+        <label class="section-title" style="margin-top:14px">Drift detection multiplier (× baseline RMSE)</label>
+        <input type="number" id="cfg-drift-mult" class="sale-text" step="0.05" min="1" value="1.2">
+        <label class="section-title" style="margin-top:14px">Recalibration / drift check interval (trials)</label>
+        <input type="number" id="cfg-recalib-n" class="sale-text" step="1" min="1" value="8">
+        <div class="btn-row">
+            <button type="button" id="cfg-save" class="btn-teal">Save overrides</button>
+            <button type="button" id="cfg-reset" class="btn-outline">Reset to defaults</button>
+            <button type="button" id="cfg-back" class="btn-outline">Back</button>
+        </div>
+    </div>
+
+    <div id="screen-research-calib-debug" class="screen">
+        <h1>Calibration debug</h1>
+        <p class="hint">Web prototype: gaze, model error, and per-eye uncertainty are simulated in real time during a calibration run.</p>
+        <button type="button" id="debug-calib-run" class="btn-teal">Run calibration with debug overlay</button>
+        <div class="btn-row">
+            <button type="button" id="debug-calib-back" class="btn-outline">Back</button>
+        </div>
+    </div>
+
+    <div id="screen-research-data-inspector" class="screen">
+        <h1>Data stream inspector</h1>
+        <p class="hint">Simulated gaze, pupil, ARKit, and IMU samples for development. Enable below, then run a researcher preview to stream during trials.</p>
+        <label class="check-row"><input type="checkbox" id="inspector-enabled"><span>Stream during researcher preview trials</span></label>
+        <button type="button" id="inspector-simulate" class="btn-outline" style="margin-top:12px">Simulate 8s stream (demo)</button>
+        <pre id="inspector-log" class="body-text" style="font-size:10px; background:#f9fafb; border:1px solid #e5e7eb; border-radius:10px; padding:10px; max-height:240px; overflow:auto; margin-top:12px;"></pre>
+        <div class="btn-row">
+            <button type="button" id="inspector-back" class="btn-outline">Back</button>
+        </div>
+    </div>
+
     <!-- 1 Welcome -->
     <div id="screen-welcome" class="screen has-stop">
+        <div id="welcome-about-wrap" style="display:none; justify-content:flex-end; margin:-8px 0 8px 0;">
+            <button type="button" id="welcome-about-me" class="btn-outline" style="margin-top:0; padding:10px 14px; width:auto; font-size:14px;">About me</button>
+        </div>
         <h1 id="welcome-heading">Welcome to SAL-E</h1>
         <p id="welcome-session-line" class="body-text font-semibold"></p>
         <p id="welcome-last-line" class="hint" style="display:none"></p>
@@ -194,7 +375,7 @@
             <input type="range" id="pre-anxiety" class="vas" min="0" max="100" value="50">
             <div class="vas-labels"><span>Not at all anxious</span><span>Extremely anxious</span></div>
         </div>
-        <p class="hint">Today's session will take about 10 minutes. You can stop at any time using the STOP button at the top of the screen.</p>
+        <p class="hint">Today's session will take about 10 minutes. You can stop at any time using the control at the top of the screen (it appears more quietly during the face blocks).</p>
         <div class="btn-row">
             <button type="button" id="welcome-continue" class="btn-teal">Continue</button>
         </div>
@@ -260,7 +441,7 @@
         </div>
         <div class="instr-section">
             <div class="instr-title">What to know</div>
-            <p class="body-text" style="margin:0">Try to keep the phone at a comfortable reading distance. Hold it steady. The session has 3 short blocks with breaks between them. You can stop at any time by tapping the STOP button at the top of the screen.</p>
+            <p class="body-text" style="margin:0">Try to keep the phone at a comfortable reading distance. Hold it steady. The session has 3 short blocks with breaks between them. You can stop at any time using the control at the top of the screen.</p>
         </div>
         <div class="btn-row">
             <button type="button" id="instructions-continue" class="btn-teal">Continue to calibration</button>
@@ -425,7 +606,6 @@
     const PARTICIPANT_STIM_MS = 3000;
     const INTER_BLOCK_AUTO_MS = 60000;
     const CALIB_DOT_MS = 1500;
-    const CALIB_PASS_RMSE_CM = 0.75;
 
     let manifest = null;
     let sessionNum = 1;
@@ -447,6 +627,13 @@
     let driftBaselineRmse = 0.45;
     let sessionStoppedEarly = false;
     let supportReturnScreen = 'screen-stop';
+    let inMainTrialBlocks = false;
+    let profileFlowMode = 'setup';
+    let dataInspectorArmed = false;
+    let calibDebugRun = false;
+    let calibDebugOverlayCleanup = null;
+
+    const LS_CALIB_CFG = 'sale_researcher_calib_config';
 
     function loadRecord() {
         try { record = JSON.parse(localStorage.getItem(LS_KEY) || '{}'); } catch (e) { record = {}; }
@@ -456,6 +643,44 @@
 
     function saveRecord() {
         localStorage.setItem(LS_KEY, JSON.stringify(record));
+    }
+
+    function getCalibConfig() {
+        const defaults = { passRmseCm: 0.75, driftMult: 1.2, recalibEveryTrials: 8 };
+        try {
+            const o = JSON.parse(localStorage.getItem(LS_CALIB_CFG) || '{}');
+            return {
+                passRmseCm: typeof o.passRmseCm === 'number' ? o.passRmseCm : defaults.passRmseCm,
+                driftMult: typeof o.driftMult === 'number' ? o.driftMult : defaults.driftMult,
+                recalibEveryTrials: typeof o.recalibEveryTrials === 'number' ? o.recalibEveryTrials : defaults.recalibEveryTrials
+            };
+        } catch (e) {
+            return defaults;
+        }
+    }
+
+    function saveCalibConfigFromForm() {
+        const passRmseCm = parseFloat(document.getElementById('cfg-rmse-pass').value);
+        const driftMult = parseFloat(document.getElementById('cfg-drift-mult').value);
+        const recalibEveryTrials = parseInt(document.getElementById('cfg-recalib-n').value, 10);
+        const payload = {
+            passRmseCm: !isNaN(passRmseCm) ? passRmseCm : 0.75,
+            driftMult: !isNaN(driftMult) ? driftMult : 1.2,
+            recalibEveryTrials: !isNaN(recalibEveryTrials) ? recalibEveryTrials : 8
+        };
+        localStorage.setItem(LS_CALIB_CFG, JSON.stringify(payload));
+    }
+
+    function loadCalibConfigForm() {
+        const c = getCalibConfig();
+        document.getElementById('cfg-rmse-pass').value = String(c.passRmseCm);
+        document.getElementById('cfg-drift-mult').value = String(c.driftMult);
+        document.getElementById('cfg-recalib-n').value = String(c.recalibEveryTrials);
+    }
+
+    function resetCalibConfigDefaults() {
+        localStorage.removeItem(LS_CALIB_CFG);
+        loadCalibConfigForm();
     }
 
     function mulberry32(a) {
@@ -481,19 +706,56 @@
         const el = document.getElementById(id);
         if (el) el.classList.add('active');
         updateStopVisibility(id);
+        syncDataInspectorPanel(id);
     }
 
     function updateStopVisibility(activeId) {
         const btn = document.getElementById('btn-stop-session');
         const hideOn = new Set([
-            'screen-welcome', 'screen-completion', 'screen-researcher',
+            'screen-researcher', 'screen-researcher-menu', 'screen-research-calib-config',
+            'screen-research-calib-debug', 'screen-research-data-inspector',
             'screen-stop', 'screen-support', 'screen-preview-done', 'modal-contact'
         ]);
-        if (hideOn.has(activeId) || previewMode) {
+        if (previewMode || hideOn.has(activeId)) {
             btn.classList.add('hidden');
             return;
         }
         btn.classList.remove('hidden');
+        const subtle = inMainTrialBlocks && (activeId === 'screen-trial' || activeId === 'screen-fixation');
+        btn.classList.toggle('stop-affordance--subtle', subtle);
+        btn.classList.toggle('stop-affordance--prominent', !subtle);
+        if (subtle) {
+            btn.textContent = 'Stop session';
+            btn.setAttribute('aria-label', 'Stop session');
+        } else {
+            btn.textContent = 'STOP SESSION';
+            btn.setAttribute('aria-label', 'Stop session');
+        }
+    }
+
+    function syncDataInspectorPanel(activeId) {
+        const panel = document.getElementById('data-inspector-panel');
+        if (!panel) return;
+        const show = dataInspectorArmed && previewMode && (activeId === 'screen-trial' || activeId === 'screen-fixation');
+        panel.classList.toggle('active', !!show);
+    }
+
+    function appendInspectorLine(line) {
+        const panel = document.getElementById('data-inspector-panel');
+        if (!panel) return;
+        panel.textContent += line + '\n';
+        panel.scrollTop = panel.scrollHeight;
+    }
+
+    function getStimulusRace() {
+        loadRecord();
+        const p = record.profile;
+        if (p && p.complete) {
+            if (p.ethnicityStimulus === 'white') return 'white';
+            if (p.ethnicityStimulus === 'black') return 'black';
+            if (p.ethnicityStimulus === 'other') return p.randomStimulusRace || 'white';
+        }
+        return localStorage.getItem('sale_stimulus_race') || 'white';
     }
 
     function getFoldersForRace(race) {
@@ -584,6 +846,139 @@
         document.getElementById('env-continue').disabled = !ok;
     }
 
+    function computeAgeYears(dobIso) {
+        if (!dobIso) return null;
+        const d = new Date(dobIso + 'T12:00:00');
+        if (isNaN(d.getTime())) return null;
+        const diff = Date.now() - d.getTime();
+        return Math.floor(diff / (365.25 * 86400000));
+    }
+
+    function updateProfileAgeLine() {
+        const dob = document.getElementById('profile-dob').value;
+        const age = computeAgeYears(dob);
+        const el = document.getElementById('profile-age-line');
+        el.textContent = age != null && age >= 0 ? `Computed age: ${age} years` : '';
+    }
+
+    function syncProfileDynamicFields() {
+        const g = document.querySelector('input[name="profile-gender"]:checked')?.value;
+        document.getElementById('profile-gender-other-wrap').style.display = g === 'other' ? 'block' : 'none';
+        const glasses = document.querySelector('input[name="profile-glasses"]:checked')?.value;
+        document.getElementById('profile-glasses-note').style.display = glasses === 'yes' ? 'block' : 'none';
+        const vis = document.querySelector('input[name="profile-vision"]:checked')?.value;
+        document.getElementById('profile-vision-wrap').style.display = vis === 'yes' ? 'block' : 'none';
+    }
+
+    function loadProfileFormFromRecord() {
+        loadRecord();
+        const p = record.profile || {};
+        if (p.participantId) {
+            document.getElementById('profile-id-line').style.display = 'block';
+            document.getElementById('profile-id-line').textContent = 'Participant ID: ' + p.participantId;
+        } else {
+            document.getElementById('profile-id-line').style.display = 'none';
+        }
+        if (p.dob) document.getElementById('profile-dob').value = p.dob;
+        if (p.sexAtBirth) {
+            const el = document.querySelector(`input[name="profile-sex"][value="${p.sexAtBirth}"]`);
+            if (el) el.checked = true;
+        }
+        if (p.genderIdentity) {
+            const el = document.querySelector(`input[name="profile-gender"][value="${p.genderIdentity}"]`);
+            if (el) el.checked = true;
+        }
+        document.getElementById('profile-gender-other').value = p.genderOtherText || '';
+        if (p.ethnicityStimulus) {
+            const el = document.querySelector(`input[name="profile-ethnicity"][value="${p.ethnicityStimulus}"]`);
+            if (el) el.checked = true;
+        }
+        if (p.glasses) {
+            const el = document.querySelector(`input[name="profile-glasses"][value="${p.glasses}"]`);
+            if (el) el.checked = true;
+        }
+        if (p.visionIssue) {
+            const el = document.querySelector(`input[name="profile-vision"][value="${p.visionIssue}"]`);
+            if (el) el.checked = true;
+        }
+        document.getElementById('profile-vision-notes').value = p.visionNotes || '';
+        updateProfileAgeLine();
+        syncProfileDynamicFields();
+    }
+
+    function readProfileForm() {
+        const dob = document.getElementById('profile-dob').value;
+        const sexAtBirth = document.querySelector('input[name="profile-sex"]:checked')?.value || 'prefer_not';
+        const genderIdentity = document.querySelector('input[name="profile-gender"]:checked')?.value || 'prefer_not';
+        const genderOtherText = document.getElementById('profile-gender-other').value.trim();
+        const ethnicityStimulus = document.querySelector('input[name="profile-ethnicity"]:checked')?.value || 'white';
+        const glasses = document.querySelector('input[name="profile-glasses"]:checked')?.value || 'no';
+        const visionIssue = document.querySelector('input[name="profile-vision"]:checked')?.value || 'no';
+        const visionNotes = document.getElementById('profile-vision-notes').value.trim();
+        return {
+            dob,
+            sexAtBirth,
+            genderIdentity,
+            genderOtherText,
+            ethnicityStimulus,
+            glasses,
+            visionIssue,
+            visionNotes
+        };
+    }
+
+    function validateProfileForm() {
+        const { dob } = readProfileForm();
+        if (!dob) {
+            alert('Please enter your date of birth.');
+            return false;
+        }
+        const age = computeAgeYears(dob);
+        if (age == null || age < 16 || age > 120) {
+            alert('Please check your date of birth (must be plausible for the study).');
+            return false;
+        }
+        return true;
+    }
+
+    function saveProfileFromForm() {
+        if (!validateProfileForm()) return false;
+        loadRecord();
+        const prev = record.profile || {};
+        const f = readProfileForm();
+        let randomStimulusRace = prev.randomStimulusRace;
+        if (f.ethnicityStimulus === 'other' && !randomStimulusRace) {
+            randomStimulusRace = Math.random() < 0.5 ? 'white' : 'black';
+        }
+        if (f.ethnicityStimulus !== 'other') randomStimulusRace = null;
+        const participantId = prev.participantId || (typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : 'P-' + Date.now());
+        record.profile = {
+            ...prev,
+            ...f,
+            participantId,
+            randomStimulusRace,
+            ageAtSave: computeAgeYears(f.dob),
+            complete: true,
+            updatedAt: new Date().toISOString()
+        };
+        const poolRace = f.ethnicityStimulus === 'white' ? 'white' : f.ethnicityStimulus === 'black' ? 'black' : randomStimulusRace;
+        localStorage.setItem('sale_stimulus_race', poolRace || 'white');
+        saveRecord();
+        appendDataQueue({ type: 'profile_saved', participantId, ethnicityStimulus: f.ethnicityStimulus });
+        return true;
+    }
+
+    function openProfileScreen(mode) {
+        profileFlowMode = mode;
+        const isEdit = mode === 'edit';
+        document.getElementById('profile-screen-title').textContent = isEdit ? 'About me' : "Let's set up your profile";
+        document.getElementById('profile-screen-intro').style.display = isEdit ? 'none' : 'block';
+        document.getElementById('profile-cancel-edit').style.display = isEdit ? 'block' : 'none';
+        document.getElementById('profile-continue').textContent = isEdit ? 'Save' : 'Continue';
+        loadProfileFormFromRecord();
+        showScreen('screen-profile');
+    }
+
     function initWelcomeUI() {
         loadRecord();
         const completed = record.completedSessions || 0;
@@ -599,6 +994,10 @@
             lastLine.style.display = 'none';
         }
         document.getElementById('pre-anxiety').value = '50';
+        const aboutWrap = document.getElementById('welcome-about-wrap');
+        if (aboutWrap) {
+            aboutWrap.style.display = (record.profile && record.profile.complete) ? 'flex' : 'none';
+        }
     }
 
     function persistPreAnxiety() {
@@ -620,7 +1019,7 @@
     }
 
     function renderExampleGrid() {
-        const race = localStorage.getItem('sale_stimulus_race') || 'white';
+        const race = getStimulusRace();
         const folders = getFoldersForRace(race);
         const base = folders[0] || 'WF/WF01';
         const grid = document.getElementById('preexp-examples-grid');
@@ -661,7 +1060,7 @@
     function runDotSequence(stageEl, points, msPerPoint, onEach, done) {
         let i = 0;
         function step() {
-            stageEl.innerHTML = '';
+            stageEl.querySelectorAll('.calib-dot').forEach(n => n.remove());
             if (i >= points.length) {
                 done();
                 return;
@@ -689,9 +1088,53 @@
         };
     }
 
-    function startCalibrationRun() {
+    function clearCalibDebugOverlay() {
+        if (typeof calibDebugOverlayCleanup === 'function') {
+            calibDebugOverlayCleanup();
+            calibDebugOverlayCleanup = null;
+        }
+        const stage = document.getElementById('calib-stage');
+        if (stage) {
+            stage.querySelectorAll('#calib-debug-overlay, #research-debug-hud').forEach(n => n.remove());
+        }
+    }
+
+    function updateCalibDebugVisual(stage, targetX, targetY, idx) {
+        let ov = stage.querySelector('#calib-debug-overlay');
+        if (!ov) {
+            ov = document.createElement('div');
+            ov.id = 'calib-debug-overlay';
+            stage.appendChild(ov);
+        }
+        let gaze = ov.querySelector('.debug-gaze');
+        if (!gaze) {
+            gaze = document.createElement('div');
+            gaze.className = 'debug-gaze';
+            ov.appendChild(gaze);
+        }
+        const jitter = (Math.sin(idx * 1.7) * 0.02) + (Math.cos(idx * 0.9) * 0.015);
+        const gx = Math.min(0.95, Math.max(0.05, targetX + jitter));
+        const gy = Math.min(0.95, Math.max(0.05, targetY - jitter * 0.6));
+        gaze.style.left = (gx * 100) + '%';
+        gaze.style.top = (gy * 100) + '%';
+        let hud = stage.querySelector('#research-debug-hud');
+        if (!hud) {
+            hud = document.createElement('div');
+            hud.id = 'research-debug-hud';
+            stage.appendChild(hud);
+        }
+        const errCm = (0.15 + Math.abs(jitter) * 8).toFixed(2);
+        const uL = (0.10 + (idx % 3) * 0.01).toFixed(2);
+        const uR = (0.11 + (idx % 4) * 0.01).toFixed(2);
+        hud.innerHTML = `Simulated gaze (norm): ${gx.toFixed(2)}, ${gy.toFixed(2)}<br>Pred. error: ${errCm} cm · Per-eye σ: L ${uL} / R ${uR} cm<br><span style="opacity:.75">ARKit / TrueDepth not available in web build</span>`;
+    }
+
+    function startCalibrationRun(debugSession) {
+        calibDebugRun = !!debugSession;
         showScreen('screen-calib-run');
         const stage = document.getElementById('calib-stage');
+        stage.innerHTML = '';
+        clearCalibDebugOverlay();
         const pts = calibrationPointsMultiDistance();
         const samples = [];
         runDotSequence(stage, pts, CALIB_DOT_MS, (i, p) => {
@@ -707,11 +1150,18 @@
                 trueDepthM: 0.45 + (1 - p.distanceBand) * 0.05,
                 t: performance.now()
             });
+            if (calibDebugRun) updateCalibDebugVisual(stage, p.x, p.y, i);
         }, () => {
             const model = fakeCalibrationModel(samples);
             currentSession[`session_${sessionNum}_calibration_model_v1`] = model;
             currentSession[`session_${sessionNum}_calibration_samples`] = samples;
-            appendDataQueue({ type: 'calibration_complete', sessionNum, n: samples.length });
+            appendDataQueue({ type: 'calibration_complete', sessionNum, n: samples.length, debug: calibDebugRun });
+            clearCalibDebugOverlay();
+            calibDebugRun = false;
+            if (debugSession) {
+                showScreen('screen-research-calib-debug');
+                return;
+            }
             showScreen('screen-val-intro');
         });
     }
@@ -719,6 +1169,7 @@
     function runValidation() {
         showScreen('screen-val-run');
         const stage = document.getElementById('valib-stage');
+        stage.innerHTML = '';
         const rng = mulberry32((sessionSeed + 404) | 0);
         const pool = calibrationPointsMultiDistance();
         const picks = shuffleRNG(pool, rng).slice(0, 5);
@@ -726,7 +1177,7 @@
         runDotSequence(stage, picks, CALIB_DOT_MS, () => {}, () => {
             picks.forEach(() => errors.push(0.3 + Math.random() * 0.35));
             const medianErr = errors.slice().sort((a, b) => a - b)[Math.floor(errors.length / 2)];
-            const passed = medianErr <= CALIB_PASS_RMSE_CM;
+            const passed = medianErr <= getCalibConfig().passRmseCm;
             currentSession[`session_${sessionNum}_calibration_rmse`] = medianErr;
             currentSession[`session_${sessionNum}_calibration_passed`] = passed;
             driftBaselineRmse = medianErr;
@@ -767,6 +1218,10 @@
         clearTimers();
         showScreen('screen-fixation');
         logFixationSample('inter_trial');
+        if (previewMode && dataInspectorArmed) {
+            const ts = performance.now().toFixed(0);
+            appendInspectorLine(`[${ts} ms] fixation · gaze(conf=0.72) x=0.51 y=0.49 · pupil L/R=3.1/3.0mm · imu=0.01g`);
+        }
         const fixMs = previewMode ? researcherFixationMs() : PARTICIPANT_FIXATION_MS;
         autoTimer = setTimeout(() => {
             renderCurrentTrial();
@@ -793,6 +1248,10 @@
             cell.innerHTML = `<img src="${trial.path}/${emo}.jpg" alt="">`;
             grid.appendChild(cell);
         });
+        if (previewMode && dataInspectorArmed) {
+            const ts = performance.now().toFixed(0);
+            appendInspectorLine(`[${ts} ms] stim · gaze(conf=0.68) x=${(0.35 + Math.random() * 0.3).toFixed(2)} y=${(0.36 + Math.random() * 0.28).toFixed(2)} · arkit_pose=sim · imu=0.02g`);
+        }
     }
 
     function logTrialStart(t0) {
@@ -825,12 +1284,15 @@
         };
         trialLog.push(entry);
         appendDataQueue(entry);
-        if (!practiceMode && !previewMode && (globalTrialIndex + 1) % 8 === 0) {
+        const cfg = getCalibConfig();
+        if (!practiceMode && !previewMode && cfg.recalibEveryTrials > 0 && (globalTrialIndex + 1) % cfg.recalibEveryTrials === 0) {
             appendDataQueue({
                 type: 'drift_check_placeholder',
                 sessionNum,
                 baselineRmse: driftBaselineRmse,
-                note: 'Native app: compare fixation error to 1.2× baseline; trigger 5-point recalibration if exceeded.'
+                driftMult: cfg.driftMult,
+                recalibEveryTrials: cfg.recalibEveryTrials,
+                note: 'Native app: compare fixation error to driftMult× baseline RMSE; trigger 5-point recalibration if exceeded.'
             });
         }
     }
@@ -857,6 +1319,7 @@
     }
 
     function startInterBlock() {
+        inMainTrialBlocks = false;
         showScreen('screen-interblock');
         interBlockDeadline = Date.now() + INTER_BLOCK_AUTO_MS;
         const cd = document.getElementById('interblock-countdown');
@@ -884,16 +1347,19 @@
         }
         currentBlockIndex++;
         trialInBlock = 0;
+        inMainTrialBlocks = true;
         runFixationThenTrial();
     }
 
     function finishSessionNormal() {
         sessionStoppedEarly = false;
+        inMainTrialBlocks = false;
         showCompletion(false);
     }
 
     function showCompletion(stoppedEarly) {
         clearTimers();
+        inMainTrialBlocks = false;
         const doneBtn = document.getElementById('completion-done');
         doneBtn.textContent = 'Done';
         delete doneBtn.dataset.step;
@@ -930,7 +1396,8 @@
     }
 
     function startPracticeTrial() {
-        const race = localStorage.getItem('sale_stimulus_race') || 'white';
+        inMainTrialBlocks = false;
+        const race = getStimulusRace();
         const folders = getFoldersForRace(race);
         const path = folders[0] || 'WF/WF01';
         practiceMode = true;
@@ -943,7 +1410,8 @@
 
     function startMainBlocks() {
         sessionStoppedEarly = false;
-        const race = localStorage.getItem('sale_stimulus_race') || 'white';
+        inMainTrialBlocks = true;
+        const race = getStimulusRace();
         sessionSeed = ((Date.now() % 100000) + (sessionNum * 17)) | 0;
         blockQueues = buildAllBlocks(race);
         currentBlockIndex = 0;
@@ -958,6 +1426,9 @@
         const layout = document.querySelector('#screen-researcher input[name="layout"]:checked').value;
         const folders = shuffleRNG(getFoldersForRace(race), mulberry32(Date.now() | 0));
         previewMode = true;
+        inMainTrialBlocks = false;
+        const dip = document.getElementById('data-inspector-panel');
+        if (dip) dip.textContent = '';
         trialLog = [];
         globalTrialIndex = 0;
         currentBlockIndex = 0;
@@ -982,6 +1453,8 @@
     function endPreview() {
         previewMode = false;
         clearTimers();
+        const panel = document.getElementById('data-inspector-panel');
+        if (panel) panel.classList.remove('active');
         showScreen('screen-preview-done');
     }
 
@@ -998,10 +1471,77 @@
         document.getElementById('researcher-start-participant').addEventListener('click', () => {
             const race = document.querySelector('#screen-researcher input[name="race"]:checked').value;
             localStorage.setItem('sale_stimulus_race', race);
+            loadRecord();
+            currentSession = {};
+            if (!record.profile || !record.profile.complete) {
+                openProfileScreen('setup');
+                return;
+            }
+            localStorage.setItem('sale_stimulus_race', getStimulusRace());
+            initWelcomeUI();
+            showScreen('screen-welcome');
+        });
+
+        document.getElementById('researcher-open-menu').addEventListener('click', () => showScreen('screen-researcher-menu'));
+        document.getElementById('researcher-menu-back').addEventListener('click', () => showScreen('screen-researcher'));
+        document.getElementById('tool-calib-config').addEventListener('click', () => {
+            loadCalibConfigForm();
+            showScreen('screen-research-calib-config');
+        });
+        document.getElementById('cfg-save').addEventListener('click', () => {
+            saveCalibConfigFromForm();
+        });
+        document.getElementById('cfg-reset').addEventListener('click', () => resetCalibConfigDefaults());
+        document.getElementById('cfg-back').addEventListener('click', () => showScreen('screen-researcher-menu'));
+        document.getElementById('tool-calib-debug').addEventListener('click', () => showScreen('screen-research-calib-debug'));
+        document.getElementById('debug-calib-back').addEventListener('click', () => showScreen('screen-researcher-menu'));
+        document.getElementById('debug-calib-run').addEventListener('click', () => startCalibrationRun(true));
+        document.getElementById('tool-data-inspector').addEventListener('click', () => {
+            document.getElementById('inspector-enabled').checked = dataInspectorArmed;
+            showScreen('screen-research-data-inspector');
+        });
+        document.getElementById('inspector-back').addEventListener('click', () => showScreen('screen-researcher-menu'));
+        document.getElementById('inspector-enabled').addEventListener('change', (e) => {
+            dataInspectorArmed = !!e.target.checked;
+        });
+        document.getElementById('inspector-simulate').addEventListener('click', () => {
+            const panel = document.getElementById('data-inspector-panel');
+            panel.textContent = '';
+            panel.classList.add('active');
+            let n = 0;
+            const id = setInterval(() => {
+                n++;
+                appendInspectorLine(`[sim ${n}] gaze x=${(Math.random()).toFixed(2)} y=${(Math.random()).toFixed(2)} conf=0.71 pupil_L=3.0mm arkit=sim imu=0.015g`);
+                if (n >= 16) {
+                    clearInterval(id);
+                    setTimeout(() => panel.classList.remove('active'), 1200);
+                }
+            }, 450);
+        });
+
+        document.getElementById('profile-dob').addEventListener('input', updateProfileAgeLine);
+        document.querySelectorAll('input[name="profile-gender"]').forEach(r => r.addEventListener('change', syncProfileDynamicFields));
+        document.querySelectorAll('input[name="profile-glasses"]').forEach(r => r.addEventListener('change', syncProfileDynamicFields));
+        document.querySelectorAll('input[name="profile-vision"]').forEach(r => r.addEventListener('change', syncProfileDynamicFields));
+        document.getElementById('profile-continue').addEventListener('click', () => {
+            if (!saveProfileFromForm()) return;
+            if (profileFlowMode === 'edit') {
+                initWelcomeUI();
+                showScreen('screen-welcome');
+                return;
+            }
+            showScreen('screen-about-research');
+        });
+        document.getElementById('profile-cancel-edit').addEventListener('click', () => {
+            initWelcomeUI();
+            showScreen('screen-welcome');
+        });
+        document.getElementById('about-research-continue').addEventListener('click', () => {
             currentSession = {};
             initWelcomeUI();
             showScreen('screen-welcome');
         });
+        document.getElementById('welcome-about-me').addEventListener('click', () => openProfileScreen('edit'));
 
         document.getElementById('researcher-preview-only').addEventListener('click', () => {
             localStorage.setItem('sale_stimulus_race', document.querySelector('#screen-researcher input[name="race"]:checked').value);
@@ -1036,7 +1576,7 @@
         });
 
         document.getElementById('instructions-continue').addEventListener('click', () => showScreen('screen-calib-intro'));
-        document.getElementById('calib-start').addEventListener('click', startCalibrationRun);
+        document.getElementById('calib-start').addEventListener('click', () => startCalibrationRun(false));
         document.getElementById('val-start').addEventListener('click', runValidation);
         document.getElementById('val-continue-practice').addEventListener('click', () => showScreen('screen-practice-intro'));
         document.getElementById('val-retry').addEventListener('click', () => showScreen('screen-calib-intro'));
@@ -1064,6 +1604,7 @@
             previewMode = false;
             practiceMode = false;
             sessionStoppedEarly = true;
+            inMainTrialBlocks = false;
             showCompletion(true);
         });
         document.getElementById('stop-support').addEventListener('click', () => {
@@ -1146,10 +1687,14 @@
             document.getElementById('researcher-preview-only').disabled = !manifest;
             showScreen('screen-researcher');
         } else {
-            localStorage.setItem('sale_stimulus_race', localStorage.getItem('sale_stimulus_race') || 'white');
+            loadRecord();
             currentSession = {};
-            initWelcomeUI();
-            showScreen('screen-welcome');
+            if (!record.profile || !record.profile.complete) {
+                openProfileScreen('setup');
+            } else {
+                initWelcomeUI();
+                showScreen('screen-welcome');
+            }
         }
         updateStopVisibility(document.querySelector('#phone-shell > .screen.active')?.id || '');
     }
