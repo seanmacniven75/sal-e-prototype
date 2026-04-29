@@ -196,10 +196,15 @@
             flex: 1; display: flex; flex-direction: column; align-items: center;
             justify-content: center; min-height: 0; gap: 0;
         }
-        .landing-logo {
-            width: 30%; max-width: 200px; min-width: 108px; margin: 0 auto 16px;
-            font-size: clamp(2.75rem, 11vw, 3.25rem); font-weight: 900; color: var(--teal);
-            letter-spacing: -0.03em; line-height: 0.95;
+        .landing-logo-wrap {
+            width: 58%; max-width: 220px; min-width: 120px; margin: 0 auto 18px;
+            display: flex; justify-content: center; align-items: center;
+        }
+        .landing-logo-img {
+            width: 100%; height: auto; display: block; object-fit: contain;
+        }
+        .researcher-logo-img {
+            max-width: 168px; width: 44%; height: auto; display: block; margin-bottom: 8px;
         }
         .landing-tagline {
             font-size: 13px; font-weight: 600; color: var(--body); line-height: 1.4;
@@ -265,7 +270,9 @@
     <!-- Screen -1: Landing (first launch only) -->
     <div id="screen-landing" class="screen screen-landing">
         <div class="landing-inner">
-            <div class="landing-logo" aria-label="SAL-E">SAL-E</div>
+            <div class="landing-logo-wrap">
+                <img src="SAL-ELogo.png" alt="SAL-E" class="landing-logo-img" width="220" height="88" decoding="async">
+            </div>
             <p class="landing-tagline">Smartphone-based Attentional Learning Environment</p>
             <p class="landing-affiliation">A research study from the Institute of Psychiatry, Psychology &amp; Neuroscience, King's College London</p>
             <div class="landing-kcl-mark" title="King's College London" aria-hidden="true">
@@ -367,7 +374,7 @@
     <!-- Researcher only -->
     <div id="screen-researcher" class="screen">
         <div class="mb-4">
-            <h1>SAL-E</h1>
+            <img src="SAL-ELogo.png" alt="SAL-E" class="researcher-logo-img" width="168" height="67" decoding="async">
             <p class="subtle">Researcher configuration</p>
         </div>
         <div class="section-block">
