@@ -58,18 +58,14 @@
         #btn-stop-session.hidden { display: none !important; }
         #btn-stop-session.stop-affordance--prominent {
             display: inline-flex; align-items: center; justify-content: center;
-            gap: 5px; background: #fff5f5; color: #b91c1c; border: 1px solid #fecaca;
-            border-radius: 8px; padding: 6px 9px; min-height: 36px; min-width: 36px;
-            font-size: 12px; font-weight: 700; letter-spacing: 0.04em;
+            background: #fff5f5; color: #dc2626; border: 1px solid #fecaca;
+            border-radius: 8px; padding: 8px 10px; min-height: 40px; min-width: 40px;
+            font-size: 12px; font-weight: 800; letter-spacing: 0.06em;
         }
-        #btn-stop-session.stop-affordance--prominent .stop-exit-svg {
-            display: block; width: 13px; height: 13px; flex-shrink: 0;
-        }
-        #btn-stop-session.stop-affordance--prominent .stop-exit-label { line-height: 1; }
         #btn-stop-session.stop-affordance--subtle {
             background: transparent; color: #9ca3af; border: none;
-            border-radius: 10px; padding: 14px 16px; min-height: 44px; min-width: 44px;
-            font-size: 14px; font-weight: 500; letter-spacing: 0.01em;
+            border-radius: 10px; padding: 14px 12px; min-height: 44px; min-width: 44px;
+            font-size: 13px; font-weight: 600; letter-spacing: 0.06em;
         }
 
         .text-link { color: var(--teal); font-weight: 600; text-decoration: underline; font-size: 16px; }
@@ -194,7 +190,7 @@
 <body>
 
 <div id="phone-shell">
-    <button type="button" id="btn-stop-session" class="hidden stop-affordance--prominent" aria-label="Stop session"></button>
+    <button type="button" id="btn-stop-session" class="hidden stop-affordance--prominent" aria-label="Stop session">STOP SESSION</button>
     <div id="data-inspector-panel" aria-live="polite"></div>
 
     <!-- Screen 0: Profile (first session only; also "About me" from Welcome) -->
@@ -380,7 +376,7 @@
             <input type="range" id="pre-anxiety" class="vas" min="0" max="100" value="50">
             <div class="vas-labels"><span>Not at all anxious</span><span>Extremely anxious</span></div>
         </div>
-        <p class="hint">Today's session will take about 10 minutes. You can leave at any time using Exit at the top of the screen (during face blocks it shows as a quieter "Stop session" link).</p>
+        <p class="hint">Today's session will take about 10 minutes. You can stop at any time using STOP SESSION at the top of the screen (during face blocks it appears in grey so it stays easy to tap but less visually prominent).</p>
         <div class="btn-row">
             <button type="button" id="welcome-continue" class="btn-teal">Continue</button>
         </div>
@@ -446,7 +442,7 @@
         </div>
         <div class="instr-section">
             <div class="instr-title">What to know</div>
-            <p class="body-text" style="margin:0">Try to keep the phone at a comfortable reading distance. Hold it steady. The session has 3 short blocks with breaks between them. You can stop at any time using the control at the top of the screen.</p>
+            <p class="body-text" style="margin:0">Try to keep the phone at a comfortable reading distance. Hold it steady. The session has 3 short blocks with breaks between them. You can stop at any time using STOP SESSION at the top of the screen.</p>
         </div>
         <div class="btn-row">
             <button type="button" id="instructions-continue" class="btn-teal">Continue to calibration</button>
@@ -620,6 +616,7 @@
     let autoTimer = null;
     let interBlockTimer = null;
     let interBlockDeadline = 0;
+    let interBlockPausedRemainingMs = null;
     let previewMode = false;
     let practiceMode = false;
     let globalTrialIndex = 0;
@@ -639,8 +636,6 @@
     let calibDebugOverlayCleanup = null;
 
     const LS_CALIB_CFG = 'sale_researcher_calib_config';
-
-    const EXIT_CONTROL_HTML = '<svg class="stop-exit-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg><span class="stop-exit-label">EXIT</span>';
 
     function loadRecord() {
         try { record = JSON.parse(localStorage.getItem(LS_KEY) || '{}'); } catch (e) { record = {}; }
@@ -731,13 +726,8 @@
         const subtle = inMainTrialBlocks && (activeId === 'screen-trial' || activeId === 'screen-fixation');
         btn.classList.toggle('stop-affordance--subtle', subtle);
         btn.classList.toggle('stop-affordance--prominent', !subtle);
-        if (subtle) {
-            btn.textContent = 'Stop session';
-            btn.setAttribute('aria-label', 'Stop session');
-        } else {
-            btn.innerHTML = EXIT_CONTROL_HTML;
-            btn.setAttribute('aria-label', 'Stop session');
-        }
+        btn.textContent = 'STOP SESSION';
+        btn.setAttribute('aria-label', 'Stop session');
     }
 
     function syncDataInspectorPanel(activeId) {
@@ -819,7 +809,14 @@
 
     function openStop() {
         const active = document.querySelector('#phone-shell > .screen.active');
-        resumeFromStop.screenId = active ? active.id : 'screen-welcome';
+        const aid = active ? active.id : null;
+        if (aid === 'screen-interblock' && interBlockDeadline) {
+            interBlockPausedRemainingMs = Math.max(0, interBlockDeadline - Date.now());
+        } else {
+            interBlockPausedRemainingMs = null;
+        }
+        clearTimers();
+        resumeFromStop.screenId = aid || 'screen-welcome';
         showScreen('screen-stop');
     }
 
@@ -1345,6 +1342,25 @@
         }, 500);
     }
 
+    function resumeInterBlockFromPause(remainingMs) {
+        interBlockDeadline = Date.now() + Math.max(1000, remainingMs);
+        const cd = document.getElementById('interblock-countdown');
+        function tick() {
+            const s = Math.max(0, Math.ceil((interBlockDeadline - Date.now()) / 1000));
+            cd.textContent = `Continuing automatically in ${s}s…`;
+        }
+        tick();
+        if (interBlockTimer) clearInterval(interBlockTimer);
+        interBlockTimer = setInterval(() => {
+            tick();
+            if (Date.now() >= interBlockDeadline) {
+                clearInterval(interBlockTimer);
+                interBlockTimer = null;
+                continueNextBlock();
+            }
+        }, 500);
+    }
+
     function continueNextBlock() {
         if (interBlockTimer) { clearInterval(interBlockTimer); interBlockTimer = null; }
         const mood = document.querySelector('input[name="break-mood"]:checked');
@@ -1598,16 +1614,25 @@
 
         document.getElementById('interblock-continue').addEventListener('click', continueNextBlock);
         document.getElementById('interblock-end').addEventListener('click', () => {
+            if (interBlockDeadline) {
+                interBlockPausedRemainingMs = Math.max(0, interBlockDeadline - Date.now());
+            }
             if (interBlockTimer) { clearInterval(interBlockTimer); interBlockTimer = null; }
             resumeFromStop.screenId = 'screen-interblock';
             showScreen('screen-stop');
         });
 
         document.getElementById('stop-continue').addEventListener('click', () => {
-            showScreen(resumeFromStop.screenId || 'screen-welcome');
+            const back = resumeFromStop.screenId || 'screen-welcome';
+            showScreen(back);
+            if (back === 'screen-interblock' && interBlockPausedRemainingMs != null) {
+                resumeInterBlockFromPause(interBlockPausedRemainingMs);
+                interBlockPausedRemainingMs = null;
+            }
         });
         document.getElementById('stop-confirm').addEventListener('click', () => {
             clearTimers();
+            interBlockPausedRemainingMs = null;
             previewMode = false;
             practiceMode = false;
             sessionStoppedEarly = true;
