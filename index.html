@@ -185,6 +185,45 @@
         }
 
         .break-countdown { font-size: 14px; color: var(--muted); text-align: center; margin: 8px 0; }
+
+        /* Screen -1: Landing (first launch only) */
+        .screen.screen-landing {
+            text-align: center;
+            padding: 40px 26px calc(28px + env(safe-area-inset-bottom, 20px));
+            justify-content: space-between;
+        }
+        .landing-inner {
+            flex: 1; display: flex; flex-direction: column; align-items: center;
+            justify-content: center; min-height: 0; gap: 0;
+        }
+        .landing-logo {
+            width: 30%; max-width: 200px; min-width: 108px; margin: 0 auto 16px;
+            font-size: clamp(2.75rem, 11vw, 3.25rem); font-weight: 900; color: var(--teal);
+            letter-spacing: -0.03em; line-height: 0.95;
+        }
+        .landing-tagline {
+            font-size: 13px; font-weight: 600; color: var(--body); line-height: 1.4;
+            max-width: 300px; margin: 0 auto 20px;
+        }
+        .landing-affiliation {
+            font-size: 12px; color: var(--muted); line-height: 1.45; max-width: 300px;
+            margin: 0 auto 14px;
+        }
+        .landing-kcl-mark {
+            width: 36px; height: 44px; margin: 0 auto 24px; color: var(--teal);
+            opacity: 0.85;
+        }
+        .landing-kcl-mark svg { width: 100%; height: 100%; display: block; }
+        .landing-welcome {
+            font-size: 16px; line-height: 1.5; text-align: center; max-width: 310px;
+            margin: 0 auto 8px; color: var(--body);
+        }
+        .landing-actions { margin-top: auto; padding-top: 24px; width: 100%; }
+        .landing-link-account {
+            background: none; border: none; color: var(--teal); font-weight: 600;
+            font-size: 15px; text-decoration: underline; cursor: pointer; width: 100%;
+            padding: 14px 8px; margin-top: 4px; font-family: inherit;
+        }
     </style>
 </head>
 <body>
@@ -192,6 +231,26 @@
 <div id="phone-shell">
     <button type="button" id="btn-stop-session" class="hidden stop-affordance--prominent" aria-label="Stop session">STOP SESSION</button>
     <div id="data-inspector-panel" aria-live="polite"></div>
+
+    <!-- Screen -1: Landing (first launch only) -->
+    <div id="screen-landing" class="screen screen-landing">
+        <div class="landing-inner">
+            <div class="landing-logo" aria-label="SAL-E">SAL-E</div>
+            <p class="landing-tagline">Smartphone-based Attentional Learning Environment</p>
+            <p class="landing-affiliation">A research study from the Institute of Psychiatry, Psychology &amp; Neuroscience, King's College London</p>
+            <div class="landing-kcl-mark" title="King's College London" aria-hidden="true">
+                <svg viewBox="0 0 24 28" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path d="M12 1L3 6v8c0 5 4 9 9 11 5-2 9-6 9-11V6L12 1z" stroke="currentColor" stroke-width="1.4" fill="none"/>
+                    <path d="M12 8v6M9 11h6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+                </svg>
+            </div>
+            <p class="landing-welcome">Welcome to SAL-E. Thank you for taking part in this research. Over the next two weeks, you'll complete five short sessions on this app. Each session takes about 10 minutes. We'll start by setting up your profile, then walk you through what to expect.</p>
+        </div>
+        <div class="landing-actions">
+            <button type="button" id="landing-get-started" class="btn-teal">Get started</button>
+            <button type="button" id="landing-have-account" class="landing-link-account">I have an account</button>
+        </div>
+    </div>
 
     <!-- Screen 0: Profile (first session only; also "About me" from Welcome) -->
     <div id="screen-profile" class="screen has-stop">
@@ -593,6 +652,13 @@
         <p class="body-text">Please contact your study coordinator using the details in your invitation email or participant information sheet.</p>
         <button type="button" id="modal-contact-close" class="btn-teal">OK</button>
     </div>
+
+    <div id="modal-signin-stub" class="modal-backdrop" role="dialog" aria-modal="true">
+        <h2 style="color:var(--teal)">Sign in</h2>
+        <p class="body-text">Account sign-in for participants who began on another device is not available in this web prototype. Please continue on your enrolled device, or contact your study coordinator for help.</p>
+        <p class="hint">If you have not yet enrolled, use <strong>Get started</strong> on the previous screen.</p>
+        <button type="button" id="modal-signin-close" class="btn-teal">Close</button>
+    </div>
 </div>
 
 <script>
@@ -636,6 +702,31 @@
     let calibDebugOverlayCleanup = null;
 
     const LS_CALIB_CFG = 'sale_researcher_calib_config';
+    const LS_FIRST_LAUNCH = 'sal_e_first_launch_completed';
+
+    function isFirstLaunchComplete() {
+        return localStorage.getItem(LS_FIRST_LAUNCH) === 'true';
+    }
+
+    function markFirstLaunchComplete() {
+        localStorage.setItem(LS_FIRST_LAUNCH, 'true');
+    }
+
+    function routeParticipantAtBoot() {
+        loadRecord();
+        currentSession = {};
+        if (record.profile && record.profile.complete) {
+            if (!isFirstLaunchComplete()) markFirstLaunchComplete();
+            initWelcomeUI();
+            showScreen('screen-welcome');
+            return;
+        }
+        if (!isFirstLaunchComplete()) {
+            showScreen('screen-landing');
+            return;
+        }
+        openProfileScreen('setup');
+    }
 
     function loadRecord() {
         try { record = JSON.parse(localStorage.getItem(LS_KEY) || '{}'); } catch (e) { record = {}; }
@@ -714,7 +805,7 @@
     function updateStopVisibility(activeId) {
         const btn = document.getElementById('btn-stop-session');
         const hideOn = new Set([
-            'screen-researcher', 'screen-researcher-menu', 'screen-research-calib-config',
+            'screen-landing', 'screen-researcher', 'screen-researcher-menu', 'screen-research-calib-config',
             'screen-research-calib-debug', 'screen-research-data-inspector',
             'screen-stop', 'screen-support', 'screen-preview-done', 'modal-contact'
         ]);
@@ -1484,6 +1575,23 @@
     function wireEvents() {
         document.getElementById('btn-stop-session').addEventListener('click', openStop);
 
+        document.getElementById('landing-get-started').addEventListener('click', () => {
+            markFirstLaunchComplete();
+            loadRecord();
+            if (record.profile && record.profile.complete) {
+                initWelcomeUI();
+                showScreen('screen-welcome');
+            } else {
+                openProfileScreen('setup');
+            }
+        });
+        document.getElementById('landing-have-account').addEventListener('click', () => {
+            document.getElementById('modal-signin-stub').classList.add('active');
+        });
+        document.getElementById('modal-signin-close').addEventListener('click', () => {
+            document.getElementById('modal-signin-stub').classList.remove('active');
+        });
+
         document.querySelectorAll('#screen-researcher input[name="dur"]').forEach(r => {
             r.addEventListener('change', e => {
                 document.getElementById('custom-dur-input').style.display =
@@ -1719,14 +1827,7 @@
             document.getElementById('researcher-preview-only').disabled = !manifest;
             showScreen('screen-researcher');
         } else {
-            loadRecord();
-            currentSession = {};
-            if (!record.profile || !record.profile.complete) {
-                openProfileScreen('setup');
-            } else {
-                initWelcomeUI();
-                showScreen('screen-welcome');
-            }
+            routeParticipantAtBoot();
         }
         updateStopVisibility(document.querySelector('#phone-shell > .screen.active')?.id || '');
     }
