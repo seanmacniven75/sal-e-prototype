@@ -12,7 +12,6 @@
         .active { display: flex; }
         
         /* Layout Grids */
-        .grid-2x2 { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 8px; margin: auto 0; }
         .grid-1x2 { display: grid; grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; gap: 12px; height: 100%; padding: 10px 0; }
         .grid-single { display: grid; grid-template-columns: 1fr; place-items: center; height: 100%; }
 
@@ -78,12 +77,9 @@
 
         <div class="section-block">
             <label class="section-title">Presentation Mode</label>
-            <div class="flex flex-col gap-2">
-                <div class="segmented-group">
-                    <label class="radio-btn"><input type="radio" name="layout" value="2x2" checked><span>2x2 Grid</span></label>
-                    <label class="radio-btn"><input type="radio" name="layout" value="1x2"><span>1x2 Portrait</span></label>
-                </div>
-                <label class="radio-btn w-full"><input type="radio" name="layout" value="single"><span>Single Face</span></label>
+            <div class="segmented-group">
+                <label class="radio-btn"><input type="radio" name="layout" value="1x2" checked><span>1×2 Portrait</span></label>
+                <label class="radio-btn"><input type="radio" name="layout" value="1x1"><span>1×1 Single</span></label>
             </div>
         </div>
 
@@ -172,15 +168,13 @@
             [...manifest.BF.map(id => `BF/${id}`), ...manifest.BM.map(id => `BM/${id}`)];
 
         trialQueue = [];
-        if (layout === '2x2') {
-            shuffle(folders).forEach(path => trialQueue.push({ path, emotions: shuffle(['NC', ...ACTIVE_EMOTIONS]), layout: 'grid-2x2' }));
-        } else if (layout === '1x2') {
+        if (layout === '1x2') {
             folders.forEach(path => {
                 const active = pickRandomActive();
                 trialQueue.push({ path, emotions: shuffle(['NC', active]), layout: 'grid-1x2' });
             });
             shuffle(trialQueue);
-        } else if (layout === 'single') {
+        } else if (layout === '1x1') {
             folders.forEach(path => {
                 const pool = ['NC', ...ACTIVE_EMOTIONS];
                 const e = pool[Math.floor(Math.random() * pool.length)];
