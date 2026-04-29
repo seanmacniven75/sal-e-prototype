@@ -225,11 +225,12 @@
             padding: 14px 8px; margin-top: 4px; font-family: inherit;
         }
 
-        /* Prototype: subtle reset (clears local app data, reloads) */
+        /* Prototype: subtle reset — top-left so it never sits over full-width bottom CTAs */
         #dev-reset-cache {
             position: absolute;
-            bottom: calc(10px + env(safe-area-inset-bottom, 0px));
-            left: 14px;
+            top: calc(10px + env(safe-area-inset-top, 0px));
+            left: calc(12px + env(safe-area-inset-left, 0px));
+            bottom: auto;
             z-index: 150;
             width: 40px;
             height: 40px;
