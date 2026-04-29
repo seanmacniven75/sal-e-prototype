@@ -189,41 +189,66 @@
         /* Screen -1: Landing (first launch only) */
         .screen.screen-landing {
             text-align: center;
-            padding: 40px 26px calc(28px + env(safe-area-inset-bottom, 20px));
-            justify-content: space-between;
+            padding: 20px 18px calc(20px + env(safe-area-inset-bottom, 16px));
+            justify-content: flex-start;
         }
-        .landing-inner {
-            flex: 1; display: flex; flex-direction: column; align-items: center;
-            justify-content: center; min-height: 0; gap: 0;
+        .landing-hero {
+            flex: 1 1 0;
+            min-height: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            padding: 12px 0 8px;
         }
         .landing-logo-wrap {
-            width: 58%; max-width: 220px; min-width: 120px; margin: 0 auto 18px;
-            display: flex; justify-content: center; align-items: center;
+            width: min(92%, 340px);
+            max-width: 340px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
         .landing-logo-img {
-            width: 100%; height: auto; display: block; object-fit: contain;
+            width: 100%;
+            height: auto;
+            display: block;
+            object-fit: contain;
+            object-position: center center;
+        }
+        .landing-copy {
+            flex-shrink: 0;
+            width: 100%;
+            max-width: 320px;
+            margin: 0 auto;
         }
         .researcher-logo-img {
-            max-width: 168px; width: 44%; height: auto; display: block; margin-bottom: 8px;
+            max-width: 200px;
+            width: min(52%, 200px);
+            height: auto;
+            display: block;
+            margin-bottom: 8px;
+            object-fit: contain;
+            object-position: center center;
         }
         .landing-tagline {
             font-size: 13px; font-weight: 600; color: var(--body); line-height: 1.4;
-            max-width: 300px; margin: 0 auto 20px;
-        }
-        .landing-affiliation {
-            font-size: 12px; color: var(--muted); line-height: 1.45; max-width: 300px;
             margin: 0 auto 14px;
         }
+        .landing-affiliation {
+            font-size: 12px; color: var(--muted); line-height: 1.45;
+            margin: 0 auto 12px;
+        }
         .landing-kcl-mark {
-            width: 36px; height: 44px; margin: 0 auto 24px; color: var(--teal);
+            width: 36px; height: 44px; margin: 0 auto 16px; color: var(--teal);
             opacity: 0.85;
         }
         .landing-kcl-mark svg { width: 100%; height: 100%; display: block; }
         .landing-welcome {
-            font-size: 16px; line-height: 1.5; text-align: center; max-width: 310px;
-            margin: 0 auto 8px; color: var(--body);
+            font-size: 16px; line-height: 1.5; text-align: center;
+            margin: 0 auto 6px; color: var(--body);
         }
-        .landing-actions { margin-top: auto; padding-top: 24px; width: 100%; }
+        .landing-actions { margin-top: auto; padding-top: 16px; width: 100%; flex-shrink: 0; }
         .landing-link-account {
             background: none; border: none; color: var(--teal); font-weight: 600;
             font-size: 15px; text-decoration: underline; cursor: pointer; width: 100%;
@@ -271,7 +296,7 @@
     <div id="screen-landing" class="screen screen-landing">
         <div class="landing-inner">
             <div class="landing-logo-wrap">
-                <img src="SAL-ELogo.png?v=2" alt="SAL-E" class="landing-logo-img" width="220" height="88" decoding="async">
+                <img src="SAL-ELogo.png?v=3" alt="SAL-E" class="landing-logo-img" width="340" height="120" decoding="async">
             </div>
             <p class="landing-tagline">Smartphone-based Attentional Learning Environment</p>
             <p class="landing-affiliation">A research study from the Institute of Psychiatry, Psychology &amp; Neuroscience, King's College London</p>
@@ -374,7 +399,7 @@
     <!-- Researcher only -->
     <div id="screen-researcher" class="screen">
         <div class="mb-4">
-            <img src="SAL-ELogo.png?v=2" alt="SAL-E" class="researcher-logo-img" width="168" height="67" decoding="async">
+            <img src="SAL-ELogo.png?v=3" alt="SAL-E" class="researcher-logo-img" width="200" height="72" decoding="async">
             <p class="subtle">Researcher configuration</p>
         </div>
         <div class="section-block">
