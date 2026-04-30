@@ -56,16 +56,23 @@
             -webkit-tap-highlight-color: transparent;
         }
         #btn-stop-session.hidden { display: none !important; }
-        /* Plain text only: colour differs between prominent (red) and subtle (grey) */
         #btn-stop-session.stop-affordance--prominent {
-            background: transparent; border: none; border-radius: 0; box-shadow: none;
-            color: #dc2626; padding: 14px 10px; min-height: 44px; min-width: 44px;
-            font-size: 12px; font-weight: 800; letter-spacing: 0.06em;
+            background: rgba(220, 38, 38, 0.08);
+            border: 1px solid rgba(220, 38, 38, 0.28);
+            border-radius: 10px;
+            color: #dc2626;
+            padding: 10px 12px;
+            min-height: 44px;
+            min-width: 44px;
+            font-size: 16px;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            text-transform: uppercase;
         }
         #btn-stop-session.stop-affordance--subtle {
             background: transparent; border: none; border-radius: 0; box-shadow: none;
-            color: #9ca3af; padding: 14px 10px; min-height: 44px; min-width: 44px;
-            font-size: 12px; font-weight: 800; letter-spacing: 0.06em;
+            color: #9ca3af; padding: 12px 10px; min-height: 44px; min-width: 44px;
+            font-size: 14px; font-weight: 600; letter-spacing: 0; text-transform: none;
         }
 
         .text-link { color: var(--teal); font-weight: 600; text-decoration: underline; font-size: 16px; }
@@ -116,8 +123,11 @@
 
         .trial-progress {
             text-align: center; font-size: 11px; color: var(--muted); font-weight: 600;
-            margin-bottom: 8px;
+            margin-bottom: 8px; display: flex; flex-direction: column; gap: 2px;
+            letter-spacing: 0.06em; text-transform: uppercase;
         }
+        .about-research-body p { margin: 0; }
+        .about-research-body p + p { margin-top: 10px; text-indent: 1em; }
 
         .section-block { margin-bottom: 18px; }
         label.section-title {
@@ -347,20 +357,27 @@
         </div>
 
         <h2 style="margin-top:20px; font-size:1.05rem">Ethnicity</h2>
-        <p class="hint">We use this to match you with photographs of people from a similar ethnic background, because research shows people respond differently to faces from their own group. If you select "Other," we'll match you randomly.</p>
+        <p class="hint">We ask about your background to help us understand how attention may differ across people. You'll see faces from both White and Black backgrounds during the sessions.</p>
         <div class="segmented-group" style="margin-top:10px;">
-            <label class="radio-btn"><input type="radio" name="profile-ethnicity" value="white" checked><span>White</span></label>
+            <label class="radio-btn"><input type="radio" name="profile-ethnicity" value="white"><span>White</span></label>
             <label class="radio-btn"><input type="radio" name="profile-ethnicity" value="black"><span>Black</span></label>
-            <label class="radio-btn"><input type="radio" name="profile-ethnicity" value="other"><span>Other</span></label>
         </div>
 
         <label class="section-title" style="margin-top:16px">Visual correction</label>
-        <p class="body-text" style="margin-bottom:6px">Do you wear glasses or contact lenses?</p>
+        <p class="body-text" style="margin-bottom:6px">Do you wear glasses or contact lenses during normal daily activities?</p>
         <div class="segmented-group">
-            <label class="radio-btn"><input type="radio" name="profile-glasses" value="no" checked><span>No</span></label>
-            <label class="radio-btn"><input type="radio" name="profile-glasses" value="yes"><span>Yes</span></label>
+            <label class="radio-btn"><input type="radio" name="profile-visual-correction-use" value="no" checked><span>No</span></label>
+            <label class="radio-btn"><input type="radio" name="profile-visual-correction-use" value="yes"><span>Yes</span></label>
         </div>
-        <p id="profile-glasses-note" class="hint" style="display:none; margin-top:8px">Please wear them as you normally would during sessions.</p>
+        <div id="profile-visual-correction-type-wrap" style="display:none; margin-top:10px;">
+            <label class="section-title">Which do you wear?</label>
+            <div class="segmented-group" style="grid-template-columns:1fr;">
+                <label class="radio-btn"><input type="radio" name="profile-visual-correction-type" value="glasses"><span>Glasses</span></label>
+                <label class="radio-btn"><input type="radio" name="profile-visual-correction-type" value="contacts"><span>Contact lenses</span></label>
+                <label class="radio-btn"><input type="radio" name="profile-visual-correction-type" value="both"><span>Both</span></label>
+            </div>
+            <p id="profile-glasses-note" class="hint" style="margin-top:8px">Please wear them as you normally would during sessions.</p>
+        </div>
 
         <label class="section-title" style="margin-top:16px">Health screening</label>
         <p class="body-text" style="margin-bottom:6px">Do you have any uncorrected vision problems we should know about?</p>
@@ -382,12 +399,13 @@
     <!-- Screen 0.5: About this research (first session only) -->
     <div id="screen-about-research" class="screen has-stop">
         <h1>About this research</h1>
-        <div class="body-text" style="font-size:16px; line-height:1.5; max-height:52vh; overflow-y:auto;">
+        <div class="body-text about-research-body" style="font-size:16px; line-height:1.5; max-height:52vh; overflow-y:auto;">
             <p>Thank you for participating in SAL-E.</p>
             <p>This study is part of research at King's College London on how people pay attention to faces. We're interested in understanding how attention works in different people, and how we can measure it using everyday smartphones rather than specialised laboratory equipment.</p>
             <p>Over the next two weeks you'll complete five short sessions like this one. Each session takes about 10 minutes and involves looking at photographs of faces. You don't need to do anything except look at the screen naturally.</p>
             <p>The information we collect will help us understand attention patterns in social anxiety and may eventually help develop better assessment tools for mental health support.</p>
             <p>Your data is encrypted, anonymised, and stored securely. You can withdraw at any time without giving a reason.</p>
+            <p>The faces shown in this prototype are placeholder examples. The actual study will use a validated stimulus set from the RADIATE database (Conley et al., 2018), with face pairings produced through a separate validation phase before deployment.</p>
         </div>
         <div class="text-link-row"><a id="link-study-info" class="text-link" href="https://www.kcl.ac.uk/research" target="_blank" rel="noopener noreferrer">Read full study information</a></div>
         <div class="text-link-row"><a id="link-consent" class="text-link" href="https://www.kcl.ac.uk/legal/privacy" target="_blank" rel="noopener noreferrer">View consent form</a></div>
@@ -498,7 +516,7 @@
             <input type="range" id="pre-anxiety" class="vas" min="0" max="100" value="50">
             <div class="vas-labels"><span>Not at all anxious</span><span>Extremely anxious</span></div>
         </div>
-        <p class="hint">Today's session will take about 10 minutes. You can stop at any time using STOP SESSION at the top of the screen (during face blocks the same label appears in grey).</p>
+        <p class="hint">Today's session will take about 10 minutes. You can stop at any time using STOP SESSION at the top of the screen (during face blocks it appears in grey so it stays easy to tap but less visually prominent).</p>
         <div class="btn-row">
             <button type="button" id="welcome-continue" class="btn-teal">Continue</button>
         </div>
@@ -636,7 +654,10 @@
     </div>
 
     <div id="screen-trial" class="screen has-stop">
-        <div id="trial-progress" class="trial-progress">Trial</div>
+        <div id="trial-progress" class="trial-progress">
+            <div id="trial-progress-block">BLOCK 1 OF 3</div>
+            <div id="trial-progress-trial">TRIAL 1 OF 16</div>
+        </div>
         <div id="face-grid-container" class="flex-grow flex flex-col justify-center" style="flex:1; min-height:0; display:flex; flex-direction:column;"></div>
     </div>
 
@@ -678,6 +699,12 @@
         <div class="btn-row">
             <button type="button" id="completion-done" class="btn-teal">Done</button>
         </div>
+    </div>
+
+    <div id="screen-study-complete" class="screen">
+        <h1>Study complete</h1>
+        <p class="body-text">You've completed all 5 sessions. Thank you for taking part in SAL-E.</p>
+        <p class="body-text" style="font-size:15px"><a href="https://www.nhs.uk/mental-health/" target="_blank" rel="noopener noreferrer" style="color:var(--teal); font-weight:600">If you need support at any time, you can find NHS resources here.</a></p>
     </div>
 
     <!-- STOP confirm -->
@@ -795,6 +822,10 @@
     function routeParticipantAtBoot() {
         loadRecord();
         currentSession = {};
+        if ((record.completedSessions || 0) >= TOTAL_PLAN_SESSIONS) {
+            showScreen('screen-study-complete');
+            return;
+        }
         if (record.profile && record.profile.complete) {
             if (!isFirstLaunchComplete()) markFirstLaunchComplete();
             initWelcomeUI();
@@ -887,7 +918,7 @@
         const hideOn = new Set([
             'screen-landing', 'screen-researcher', 'screen-researcher-menu', 'screen-research-calib-config',
             'screen-research-calib-debug', 'screen-research-data-inspector',
-            'screen-stop', 'screen-support', 'screen-preview-done', 'modal-contact'
+            'screen-stop', 'screen-support', 'screen-preview-done', 'modal-contact', 'screen-study-complete'
         ]);
         if (previewMode || hideOn.has(activeId)) {
             btn.classList.add('hidden');
@@ -897,7 +928,7 @@
         const subtle = inMainTrialBlocks && (activeId === 'screen-trial' || activeId === 'screen-fixation');
         btn.classList.toggle('stop-affordance--subtle', subtle);
         btn.classList.toggle('stop-affordance--prominent', !subtle);
-        btn.textContent = 'STOP SESSION';
+        btn.textContent = subtle ? 'Stop session' : 'STOP SESSION';
         btn.setAttribute('aria-label', 'Stop session');
     }
 
@@ -916,21 +947,20 @@
     }
 
     function getStimulusRace() {
-        loadRecord();
-        const p = record.profile;
-        if (p && p.complete) {
-            if (p.ethnicityStimulus === 'white') return 'white';
-            if (p.ethnicityStimulus === 'black') return 'black';
-            if (p.ethnicityStimulus === 'other') return p.randomStimulusRace || 'white';
-        }
-        return localStorage.getItem('sale_stimulus_race') || 'white';
+        if (!IS_RESEARCHER) return 'mixed';
+        return localStorage.getItem('sale_stimulus_race') || 'mixed';
     }
 
     function getFoldersForRace(race) {
         if (!manifest) return [];
-        return race === 'white'
-            ? [...manifest.WF.map(id => `WF/${id}`), ...manifest.WM.map(id => `WM/${id}`)]
-            : [...manifest.BF.map(id => `BF/${id}`), ...manifest.BM.map(id => `BM/${id}`)];
+        if (race === 'white') return [...manifest.WF.map(id => `WF/${id}`), ...manifest.WM.map(id => `WM/${id}`)];
+        if (race === 'black') return [...manifest.BF.map(id => `BF/${id}`), ...manifest.BM.map(id => `BM/${id}`)];
+        return [
+            ...manifest.WF.map(id => `WF/${id}`),
+            ...manifest.WM.map(id => `WM/${id}`),
+            ...manifest.BF.map(id => `BF/${id}`),
+            ...manifest.BM.map(id => `BM/${id}`)
+        ];
     }
 
     function buildBlockTrials(identities, blockIdx) {
@@ -1039,10 +1069,16 @@
     function syncProfileDynamicFields() {
         const g = document.querySelector('input[name="profile-gender"]:checked')?.value;
         document.getElementById('profile-gender-other-wrap').style.display = g === 'other' ? 'block' : 'none';
-        const glasses = document.querySelector('input[name="profile-glasses"]:checked')?.value;
-        document.getElementById('profile-glasses-note').style.display = glasses === 'yes' ? 'block' : 'none';
+        const visualCorrectionUse = document.querySelector('input[name="profile-visual-correction-use"]:checked')?.value;
+        document.getElementById('profile-visual-correction-type-wrap').style.display = visualCorrectionUse === 'yes' ? 'block' : 'none';
         const vis = document.querySelector('input[name="profile-vision"]:checked')?.value;
         document.getElementById('profile-vision-wrap').style.display = vis === 'yes' ? 'block' : 'none';
+        syncProfileContinueState();
+    }
+
+    function syncProfileContinueState() {
+        const hasEthnicity = !!document.querySelector('input[name="profile-ethnicity"]:checked');
+        document.getElementById('profile-continue').disabled = !hasEthnicity;
     }
 
     function loadProfileFormFromRecord() {
@@ -1068,9 +1104,15 @@
             const el = document.querySelector(`input[name="profile-ethnicity"][value="${p.ethnicityStimulus}"]`);
             if (el) el.checked = true;
         }
-        if (p.glasses) {
-            const el = document.querySelector(`input[name="profile-glasses"][value="${p.glasses}"]`);
+        const visualCorrection = p.profile_visual_correction || (p.glasses === 'yes' ? 'glasses' : 'none');
+        if (visualCorrection === 'none') {
+            const el = document.querySelector('input[name="profile-visual-correction-use"][value="no"]');
             if (el) el.checked = true;
+        } else {
+            const useYes = document.querySelector('input[name="profile-visual-correction-use"][value="yes"]');
+            if (useYes) useYes.checked = true;
+            const typeEl = document.querySelector(`input[name="profile-visual-correction-type"][value="${visualCorrection}"]`);
+            if (typeEl) typeEl.checked = true;
         }
         if (p.visionIssue) {
             const el = document.querySelector(`input[name="profile-vision"][value="${p.visionIssue}"]`);
@@ -1086,8 +1128,10 @@
         const sexAtBirth = document.querySelector('input[name="profile-sex"]:checked')?.value || 'prefer_not';
         const genderIdentity = document.querySelector('input[name="profile-gender"]:checked')?.value || 'prefer_not';
         const genderOtherText = document.getElementById('profile-gender-other').value.trim();
-        const ethnicityStimulus = document.querySelector('input[name="profile-ethnicity"]:checked')?.value || 'white';
-        const glasses = document.querySelector('input[name="profile-glasses"]:checked')?.value || 'no';
+        const ethnicityStimulus = document.querySelector('input[name="profile-ethnicity"]:checked')?.value || '';
+        const visualCorrectionUse = document.querySelector('input[name="profile-visual-correction-use"]:checked')?.value || 'no';
+        const visualCorrectionType = document.querySelector('input[name="profile-visual-correction-type"]:checked')?.value || '';
+        const profileVisualCorrection = visualCorrectionUse === 'yes' ? visualCorrectionType : 'none';
         const visionIssue = document.querySelector('input[name="profile-vision"]:checked')?.value || 'no';
         const visionNotes = document.getElementById('profile-vision-notes').value.trim();
         return {
@@ -1096,16 +1140,25 @@
             genderIdentity,
             genderOtherText,
             ethnicityStimulus,
-            glasses,
+            profile_visual_correction: profileVisualCorrection,
+            glasses: profileVisualCorrection === 'none' ? 'no' : 'yes',
             visionIssue,
             visionNotes
         };
     }
 
     function validateProfileForm() {
-        const { dob } = readProfileForm();
+        const { dob, ethnicityStimulus, profile_visual_correction } = readProfileForm();
         if (!dob) {
             alert('Please enter your date of birth.');
+            return false;
+        }
+        if (!ethnicityStimulus) {
+            alert('Please select your ethnicity.');
+            return false;
+        }
+        if (!profile_visual_correction) {
+            alert('Please select which visual correction you wear.');
             return false;
         }
         const age = computeAgeYears(dob);
@@ -1121,23 +1174,16 @@
         loadRecord();
         const prev = record.profile || {};
         const f = readProfileForm();
-        let randomStimulusRace = prev.randomStimulusRace;
-        if (f.ethnicityStimulus === 'other' && !randomStimulusRace) {
-            randomStimulusRace = Math.random() < 0.5 ? 'white' : 'black';
-        }
-        if (f.ethnicityStimulus !== 'other') randomStimulusRace = null;
         const participantId = prev.participantId || (typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : 'P-' + Date.now());
         record.profile = {
             ...prev,
             ...f,
             participantId,
-            randomStimulusRace,
             ageAtSave: computeAgeYears(f.dob),
             complete: true,
             updatedAt: new Date().toISOString()
         };
-        const poolRace = f.ethnicityStimulus === 'white' ? 'white' : f.ethnicityStimulus === 'black' ? 'black' : randomStimulusRace;
-        localStorage.setItem('sale_stimulus_race', poolRace || 'white');
+        localStorage.setItem('sale_stimulus_race', 'mixed');
         saveRecord();
         appendDataQueue({ type: 'profile_saved', participantId, ethnicityStimulus: f.ethnicityStimulus });
         return true;
@@ -1363,7 +1409,7 @@
             const failA = document.getElementById('val-fail-actions');
             if (passed) {
                 title.textContent = 'All set';
-                body.textContent = "You're ready to begin.";
+                body.textContent = "All set. You're ready to begin.";
                 passA.style.display = 'flex';
                 failA.style.display = 'none';
                 calibrationWarning = false;
@@ -1411,9 +1457,15 @@
     function renderCurrentTrial() {
         const container = document.getElementById('face-grid-container');
         const trial = blockQueues[currentBlockIndex][trialInBlock];
-        const total = BLOCKS * TRIALS_PER_BLOCK;
-        document.getElementById('trial-progress').textContent =
-            previewMode ? `Preview · Trial ${globalTrialIndex + 1}` : `Trial ${globalTrialIndex + 1} of ${total}`;
+        const blockEl = document.getElementById('trial-progress-block');
+        const trialEl = document.getElementById('trial-progress-trial');
+        if (previewMode) {
+            blockEl.textContent = 'Preview';
+            trialEl.textContent = `Trial ${globalTrialIndex + 1}`;
+        } else {
+            blockEl.textContent = `BLOCK ${currentBlockIndex + 1} OF ${BLOCKS}`;
+            trialEl.textContent = `TRIAL ${trialInBlock + 1} OF ${TRIALS_PER_BLOCK}`;
+        }
         const layoutClass = trial.layout === 'grid-single' ? 'grid-single' : 'grid-1x2';
         container.innerHTML = `<div id="face-grid" class="${layoutClass}"></div>`;
         const grid = document.getElementById('face-grid');
@@ -1737,7 +1789,9 @@
 
         document.getElementById('profile-dob').addEventListener('input', updateProfileAgeLine);
         document.querySelectorAll('input[name="profile-gender"]').forEach(r => r.addEventListener('change', syncProfileDynamicFields));
-        document.querySelectorAll('input[name="profile-glasses"]').forEach(r => r.addEventListener('change', syncProfileDynamicFields));
+        document.querySelectorAll('input[name="profile-ethnicity"]').forEach(r => r.addEventListener('change', syncProfileDynamicFields));
+        document.querySelectorAll('input[name="profile-visual-correction-use"]').forEach(r => r.addEventListener('change', syncProfileDynamicFields));
+        document.querySelectorAll('input[name="profile-visual-correction-type"]').forEach(r => r.addEventListener('change', syncProfileDynamicFields));
         document.querySelectorAll('input[name="profile-vision"]').forEach(r => r.addEventListener('change', syncProfileDynamicFields));
         document.getElementById('profile-continue').addEventListener('click', () => {
             if (!saveProfileFromForm()) return;
