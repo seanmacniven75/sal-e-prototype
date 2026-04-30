@@ -969,7 +969,16 @@
         const acts = [...Array(5).fill('FC'), ...Array(5).fill('HO'), ...Array(6).fill('AO')];
         const shuffledActs = shuffleRNG(acts, rng);
         const posFlags = shuffleRNG([...Array(8).fill(true), ...Array(8).fill(false)], rng);
-        const ids = shuffleRNG(identities, rng).slice(0, TRIALS_PER_BLOCK);
+        let ids = shuffleRNG(identities, rng).slice(0, TRIALS_PER_BLOCK);
+        const whiteIds = identities.filter(p => p.startsWith('WF/') || p.startsWith('WM/'));
+        const blackIds = identities.filter(p => p.startsWith('BF/') || p.startsWith('BM/'));
+        if (whiteIds.length && blackIds.length) {
+            const whitePick = shuffleRNG(whiteIds, rng).slice(0, TRIALS_PER_BLOCK / 2);
+            while (whitePick.length < TRIALS_PER_BLOCK / 2) whitePick.push(whiteIds[whitePick.length % whiteIds.length]);
+            const blackPick = shuffleRNG(blackIds, rng).slice(0, TRIALS_PER_BLOCK / 2);
+            while (blackPick.length < TRIALS_PER_BLOCK / 2) blackPick.push(blackIds[blackPick.length % blackIds.length]);
+            ids = shuffleRNG([...whitePick, ...blackPick], rng);
+        }
         while (ids.length < TRIALS_PER_BLOCK) ids.push(identities[ids.length % identities.length]);
         const trials = [];
         for (let i = 0; i < TRIALS_PER_BLOCK; i++) {
