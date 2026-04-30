@@ -982,12 +982,11 @@
         while (ids.length < TRIALS_PER_BLOCK) ids.push(identities[ids.length % identities.length]);
         const trials = [];
         for (let i = 0; i < TRIALS_PER_BLOCK; i++) {
-            const topPath = ids[i % ids.length];
-            const bottomPath = ids[(i + 1) % ids.length];
+            const pairPath = ids[i % ids.length];
             const active = shuffledActs[i];
             const activeOnTop = posFlags[i];
             const emotions = activeOnTop ? [active, 'NC'] : ['NC', active];
-            const paths = activeOnTop ? [topPath, bottomPath] : [bottomPath, topPath];
+            const paths = [pairPath, pairPath];
             trials.push({ paths, emotions, active, activeOnTop, layout: 'grid-1x2' });
         }
         return trials;
@@ -1257,16 +1256,14 @@
         const grid = document.getElementById('preexp-examples-grid');
         grid.innerHTML = '';
         const pairA = folders[0] || 'WF/WF01';
-        const pairB = folders[1] || folders[0] || 'WF/WF02';
-        const pairC = folders[2] || folders[0] || 'WM/WM01';
-        const pairD = folders[3] || folders[1] || 'BM/BM01';
+        const pairB = folders[1] || folders[0] || 'WM/WM01';
         const specs = [
-            { topPath: pairA, topEmo: 'NC', bottomPath: pairB, bottomEmo: 'AO', label: 'Example pair: Neutral vs Angry' },
-            { topPath: pairC, topEmo: 'NC', bottomPath: pairD, bottomEmo: 'FC', label: 'Example pair: Neutral vs Happy' }
+            { pairPath: pairA, topEmo: 'NC', bottomEmo: 'AO', label: 'Example pair: Neutral vs Angry' },
+            { pairPath: pairB, topEmo: 'NC', bottomEmo: 'FC', label: 'Example pair: Neutral vs Happy' }
         ];
         specs.forEach(s => {
             const wrap = document.createElement('div');
-            wrap.innerHTML = `<div class="ex-cell"><img src="${s.topPath}/${s.topEmo}.jpg" alt=""></div><div class="ex-cell" style="margin-top:8px"><img src="${s.bottomPath}/${s.bottomEmo}.jpg" alt=""></div><div class="ex-cap">${s.label}</div>`;
+            wrap.innerHTML = `<div class="ex-cell"><img src="${s.pairPath}/${s.topEmo}.jpg" alt=""></div><div class="ex-cell" style="margin-top:8px"><img src="${s.pairPath}/${s.bottomEmo}.jpg" alt=""></div><div class="ex-cap">${s.label}</div>`;
             grid.appendChild(wrap);
         });
     }
@@ -1660,9 +1657,8 @@
         const race = getStimulusRace();
         const folders = getFoldersForRace(race);
         const pathA = folders[0] || 'WF/WF01';
-        const pathB = folders[1] || folders[0] || 'WF/WF01';
         practiceMode = true;
-        blockQueues = [[{ paths: [pathA, pathB], emotions: ['NC', 'NC'], active: 'NC', activeOnTop: true, layout: 'grid-1x2' }]];
+        blockQueues = [[{ paths: [pathA, pathA], emotions: ['NC', 'NC'], active: 'NC', activeOnTop: true, layout: 'grid-1x2' }]];
         currentBlockIndex = 0;
         trialInBlock = 0;
         globalTrialIndex = 0;
