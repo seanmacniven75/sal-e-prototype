@@ -973,11 +973,13 @@
         while (ids.length < TRIALS_PER_BLOCK) ids.push(identities[ids.length % identities.length]);
         const trials = [];
         for (let i = 0; i < TRIALS_PER_BLOCK; i++) {
-            const path = ids[i % ids.length];
+            const topPath = ids[i % ids.length];
+            const bottomPath = ids[(i + 1) % ids.length];
             const active = shuffledActs[i];
             const activeOnTop = posFlags[i];
             const emotions = activeOnTop ? [active, 'NC'] : ['NC', active];
-            trials.push({ path, emotions, active, activeOnTop, layout: 'grid-1x2' });
+            const paths = activeOnTop ? [topPath, bottomPath] : [bottomPath, topPath];
+            trials.push({ paths, emotions, active, activeOnTop, layout: 'grid-1x2' });
         }
         return trials;
     }
@@ -1470,10 +1472,11 @@
         const layoutClass = trial.layout === 'grid-single' ? 'grid-single' : 'grid-1x2';
         container.innerHTML = `<div id="face-grid" class="${layoutClass}"></div>`;
         const grid = document.getElementById('face-grid');
-        trial.emotions.forEach(emo => {
+        trial.emotions.forEach((emo, idx) => {
             const cell = document.createElement('div');
             cell.className = 'face-cell w-full';
-            cell.innerHTML = `<img src="${trial.path}/${emo}.jpg" alt="">`;
+            const path = (trial.paths && trial.paths[idx]) ? trial.paths[idx] : trial.path;
+            cell.innerHTML = `<img src="${path}/${emo}.jpg" alt="">`;
             grid.appendChild(cell);
         });
         if (previewMode && dataInspectorArmed) {
@@ -1489,7 +1492,7 @@
             globalTrialIndex,
             block: currentBlockIndex,
             trialInBlock,
-            path: blockQueues[currentBlockIndex][trialInBlock].path,
+            paths: blockQueues[currentBlockIndex][trialInBlock].paths || [blockQueues[currentBlockIndex][trialInBlock].path],
             emotions: blockQueues[currentBlockIndex][trialInBlock].emotions,
             active: blockQueues[currentBlockIndex][trialInBlock].active,
             activeOnTop: blockQueues[currentBlockIndex][trialInBlock].activeOnTop,
@@ -1505,7 +1508,7 @@
             globalTrialIndex,
             block: currentBlockIndex,
             trialInBlock,
-            path: trial.path,
+            paths: trial.paths || [trial.path],
             stimuli: trial.emotions.join(','),
             active: trial.active,
             activeOnTop: trial.activeOnTop
@@ -1646,9 +1649,10 @@
         inMainTrialBlocks = false;
         const race = getStimulusRace();
         const folders = getFoldersForRace(race);
-        const path = folders[0] || 'WF/WF01';
+        const pathA = folders[0] || 'WF/WF01';
+        const pathB = folders[1] || folders[0] || 'WF/WF01';
         practiceMode = true;
-        blockQueues = [[{ path, emotions: ['NC', 'NC'], active: 'NC', activeOnTop: true, layout: 'grid-1x2' }]];
+        blockQueues = [[{ paths: [pathA, pathB], emotions: ['NC', 'NC'], active: 'NC', activeOnTop: true, layout: 'grid-1x2' }]];
         currentBlockIndex = 0;
         trialInBlock = 0;
         globalTrialIndex = 0;
