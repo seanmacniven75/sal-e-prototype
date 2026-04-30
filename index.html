@@ -1253,19 +1253,20 @@
 
     function renderExampleGrid() {
         const race = getStimulusRace();
-        const folders = getFoldersForRace(race);
-        const base = folders[0] || 'WF/WF01';
+        const folders = shuffleRNG(getFoldersForRace(race), mulberry32((Date.now() + sessionNum * 131) | 0));
         const grid = document.getElementById('preexp-examples-grid');
         grid.innerHTML = '';
+        const pairA = folders[0] || 'WF/WF01';
+        const pairB = folders[1] || folders[0] || 'WF/WF02';
+        const pairC = folders[2] || folders[0] || 'WM/WM01';
+        const pairD = folders[3] || folders[1] || 'BM/BM01';
         const specs = [
-            { emo: 'NC', label: 'Neutral' },
-            { emo: 'FC', label: 'Happy' },
-            { emo: 'HO', label: 'Sad' },
-            { emo: 'AO', label: 'Angry' }
+            { topPath: pairA, topEmo: 'NC', bottomPath: pairB, bottomEmo: 'AO', label: 'Example pair: Neutral vs Angry' },
+            { topPath: pairC, topEmo: 'NC', bottomPath: pairD, bottomEmo: 'FC', label: 'Example pair: Neutral vs Happy' }
         ];
         specs.forEach(s => {
             const wrap = document.createElement('div');
-            wrap.innerHTML = `<div class="ex-cell"><img src="${base}/${s.emo}.jpg" alt=""></div><div class="ex-cap">${s.label}</div>`;
+            wrap.innerHTML = `<div class="ex-cell"><img src="${s.topPath}/${s.topEmo}.jpg" alt=""></div><div class="ex-cell" style="margin-top:8px"><img src="${s.bottomPath}/${s.bottomEmo}.jpg" alt=""></div><div class="ex-cap">${s.label}</div>`;
             grid.appendChild(wrap);
         });
     }
